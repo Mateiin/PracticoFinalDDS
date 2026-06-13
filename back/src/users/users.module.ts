@@ -1,7 +1,7 @@
 import { JwtStrategy } from './jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthController } from './auth.controller';
+import { AuthController } from '../auth/auth.controller';
 import { Global, Module } from '@nestjs/common';
 import { UsersController } from './controllers/users.controller';
 import { JsonPlaceholderUsersGateway } from './gateways/jsonplaceholder-users.gateway';
