@@ -1,0 +1,11 @@
+# Dependencias
+node_modules/
+
+# Compilación
+dist/
+
+# Archivos de base de datos local
+*.sqlite
+
+# Caja fuerte / Secretos (Súper Importante)
+.env
