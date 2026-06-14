@@ -1,5 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
-import { BadGatewayException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadGatewayException, Inject, Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ConfigService } from '@nestjs/config';
@@ -62,7 +62,16 @@ export class UsersService {
 
     //SE ARMA EL USUARIO Y SE GUARDA
     const entity = this.usersRepo.create({ email, passwordHash, role });
-    return await this.usersRepo.save(entity);
+    const saved = await this.usersRepo.save(entity);
+
+    //generamos token JWT
+    const payload = { sub: saved.id, email: saved.email, role: saved.role };
+    const token = await this.jwtService.signAsync(payload);
+
+    return {
+      access_token: token,
+      user: { id: saved.id, email: saved.email, role: saved.role, createdAt: saved.createdAt },
+    };
   }
 
   async login(email: string, plainPassword: string) {
@@ -70,7 +79,7 @@ export class UsersService {
 
     const q = this.usersRepo.createQueryBuilder('u')
     .addSelect('u.passwordHash')
-    .where('u.email = :email', { email });
+    .where('u.email = :email', { email: cleanEmail });
     const user = await q.getOne();
 
     if (!user) {
@@ -89,10 +98,27 @@ export class UsersService {
     //se firma el token con nuestro servicio
     const token = await this.jwtService.signAsync(payload);
 
-    //devolvemos el tojen al frontend
-    return {access_token: token}
+    //devolvemos el tojen al frontend junto con el usuario
+    return {
+      access_token: token,
+      user: { id: user.id, email: user.email, role: user.role, createdAt: user.createdAt },
+    };
+  }
 
-   
+  async findById(id: string): Promise<{ id: string; email: string; role: UserRole; createdAt: Date } | null> {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) return null;
+    return { id: user.id, email: user.email, role: user.role, createdAt: user.createdAt };
+  }
+
+  async updateRole(id: string, newRole: UserRole): Promise<{ id: string; email: string; role: UserRole; createdAt: Date }> {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    user.role = newRole;
+    const saved = await this.usersRepo.save(user);
+    return { id: saved.id, email: saved.email, role: saved.role, createdAt: saved.createdAt };
   }
 }
 

@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException, ConflictException,forwardRef } from "@nestjs/common";
-import { CreateCategoryInput } from "../category.types";
+import { CreateCategoryInput, UpdateCategoryInput } from "../category.types";
 import { CATEGORIES_REPOSITORY, CategoriesRepository } from "../repositories/categories.repository";
 import { ProductsService } from "../../products/services/products.service";
 
@@ -26,6 +26,14 @@ export class CategoriesService {
 
     create(input: CreateCategoryInput) {
         return this.categoriesRepository.create(input);
+    }
+
+    update(id: number, input: UpdateCategoryInput) {
+        const category = this.categoriesRepository.update(id, input);
+        if (!category) {
+            throw new NotFoundException(`La categoria con ID ${id} no existe`);
+        }
+        return category;
     }
 
     async remove(id: number) { 

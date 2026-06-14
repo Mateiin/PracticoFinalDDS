@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { UserRole } from './user-role.enum';
 @Entity('users')
 export class UserEntity {
@@ -14,5 +14,8 @@ export class UserEntity {
 
     @Column({ type: 'text', default: UserRole.USER })
     role!: UserRole;
+
+    @CreateDateColumn()
+    createdAt!: Date;
 
 }

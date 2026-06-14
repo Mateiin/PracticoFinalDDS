@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -27,6 +27,13 @@ export class UsersController {
     // convertimos el ID de la URL a numero y llamamos al servicio para buscar el usuario
     // como el servicio es async (usa axios), devolvemos la promesa
     return this.usersService.findOne(Number(id));
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Patch(':id/role')
+  async updateRole(@Param('id') id: string, @Body('role') role: UserRole) {
+    return this.usersService.updateRole(id, role);
   }
 
   @Post('test-email')

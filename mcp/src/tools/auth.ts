@@ -28,10 +28,4 @@ export default [
     description: "Obtiene los datos del usuario autenticado actualmente",
     handler: async () => api.get("/auth/me"),
   },
-  {
-    name: "delete_my_account",
-    description: "Elimina la cuenta del usuario autenticado",
-    inputSchema: { password: z.string() },
-    handler: async (body: any) => api.del("/users/me", { data: body }),
-  },
 ] as ToolDef[];
