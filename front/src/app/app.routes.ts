@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -39,5 +39,9 @@ export const routes: Routes = [
     path: 'admin/users',
     loadComponent: () => import('./pages/admin-users/admin-users').then((m) => m.AdminUsersPage),
     canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () => import('./pages/verify-email/verify-email').then((m) => m.VerifyEmailPage),
   },
 ];

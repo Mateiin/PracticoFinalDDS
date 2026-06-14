@@ -15,4 +15,18 @@ export class UserEntity {
     @Column({ type: 'text', default: UserRole.USER })
     role!: UserRole;
 
+    //Verificacion de email
+    @Column({ default: false })
+    isEmailVerified!: boolean;
+
+    @Column({ type:'varchar', nullable: true })
+    emailVerificationToken!: string | null;
+
+    //Recuperacion de contraseña
+    @Column({ type: 'varchar', nullable: true })
+    passwordResetToken!: string | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    passwordResetTokenExpiration!: Date | null;
+
 }

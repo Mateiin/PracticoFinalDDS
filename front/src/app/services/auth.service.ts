@@ -1,10 +1,10 @@
-import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { AuthResponse, LoginDto, RegisterDto } from '../models/auth';
 import { SafeUser } from '../models/user';
-import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -39,6 +39,10 @@ export class AuthService {
     return this.http.get<SafeUser>(`${this.api}/me`).pipe(
       tap((user) => this.user.set(user)),
     );
+  }
+
+  verifyEmail(token: string): Observable<any> {
+    return this.http.post(`${this.api}/verify-email`, { token });
   }
 
   logout(): void {

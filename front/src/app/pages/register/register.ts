@@ -19,6 +19,7 @@ export class RegisterPage {
   confirmPassword = '';
   error = '';
   loading = signal(false);
+  registered = signal(false);
 
   async submit(): Promise<void> {
     this.error = '';
@@ -32,10 +33,11 @@ export class RegisterPage {
 
     try {
       await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
-      this.router.navigate(['/']);
+      this.registered.set(true);
+      // Después de 3 segundos, redirigir al home
+      setTimeout(() => this.router.navigate(['/']), 3000);
     } catch (err: any) {
       this.error = err.error?.message || 'Error al registrarse';
-    } finally {
       this.loading.set(false);
     }
   }

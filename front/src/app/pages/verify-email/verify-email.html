@@ -1,0 +1,13 @@
+<div class="verify-email-container">
+  <div class="verify-email-card">
+    <h1>Verificar Email</h1>
+
+    <div *ngIf="isLoading" class="loading">
+      <p>Verificando tu email...</p>
+    </div>
+
+    <div *ngIf="!isLoading && message" [ngClass]="{ success: success, error: !success }">
+      <p>{{ message }}</p>
+    </div>
+  </div>
+</div>

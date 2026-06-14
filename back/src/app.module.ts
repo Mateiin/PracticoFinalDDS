@@ -1,14 +1,14 @@
-import { TimingMiddleware } from './common/middlewares/timing.middleware';
-import { MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { LoggerMiddleware } from './common/middlewares/logger.middleware';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
-import { UsersModule } from './users/users.module';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { TimingMiddleware } from './common/middlewares/timing.middleware';
 import { MailModule } from './mail/mail.module';
+import { OrdersModule } from './orders/orders.module';
+import { ProductsModule } from './products/products.module';
 import { TestModule } from './test/test.module';
+import { UsersModule } from './users/users.module';
 @Module({
 imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -22,7 +22,8 @@ imports: [
     CategoriesModule,
     UsersModule,
     MailModule,
-    TestModule,   
+    TestModule,
+    OrdersModule,   
   ],
 })
 export class AppModule implements NestModule {
