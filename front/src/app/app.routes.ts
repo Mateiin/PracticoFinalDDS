@@ -42,6 +42,6 @@ export const routes: Routes = [
   },
   {
     path: 'verify-email',
-    loadComponent: () => import('./pages/verify-email/verify-email').then((m) => m.VerifyEmailPage),
+    loadComponent: () => import('./verify-email/verify-email.component').then((m) => m.VerifyEmail),
   },
 ];

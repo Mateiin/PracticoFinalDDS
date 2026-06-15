@@ -1,0 +1,22 @@
+<div class="verify-container">
+  <div class="card">
+    
+    <div *ngIf="!exito && !error" class="estado cargando">
+      <h2>⏳ Aguardá un momento...</h2>
+      <p>{{ mensaje }}</p>
+    </div>
+
+    <div *ngIf="exito" class="estado exito">
+      <h2>✅ ¡Excelente!</h2>
+      <p>{{ mensaje }}</p>
+      <button (click)="irAlLogin()" class="btn-login">Ir al Login</button>
+    </div>
+
+    <div *ngIf="error" class="estado error">
+      <h2>❌ Ups... algo salió mal</h2>
+      <p>{{ mensaje }}</p>
+      <button (click)="irAlLogin()" class="btn-volver">Volver al Login</button>
+    </div>
+
+  </div>
+</div>

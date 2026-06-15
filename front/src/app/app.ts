@@ -6,8 +6,10 @@ import { Footer } from './shared/footer/footer';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet, Navbar, BottomNav, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
+
 export class App {}

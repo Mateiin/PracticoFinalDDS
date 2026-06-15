@@ -4,6 +4,7 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-bottom-nav',
+  standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './bottom-nav.html',
   styleUrl: './bottom-nav.css',

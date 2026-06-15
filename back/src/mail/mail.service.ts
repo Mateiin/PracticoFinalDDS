@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
-  private resend: Resend;
+  private resend: Resend | null = null;
   private fromAddress: string;
   private readonly logger = new Logger(MailService.name);
 
@@ -12,21 +12,27 @@ export class MailService {
     const apiKey = this.config.get<string>('RESEND_API_KEY') ?? process.env.RESEND_API_KEY;
     this.fromAddress = this.config.get<string>('MAIL_FROM') ?? process.env.MAIL_FROM ?? 'onboarding@resend.dev';
 
-    if (!apiKey) {
-      this.logger.warn('No RESEND_API_KEY configured — los envíos de correo fallarán hasta configurar la variable.');
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+    } else {
+      this.logger.warn('No RESEND_API_KEY configurada. Los correos no se enviarán.');
     }
-
-    // Inicializamos Resend aunque apiKey sea undefined (la librería lanzará error al usarla)
-    this.resend = new Resend(apiKey ?? '');
   }
 
   async sendMail(to: string, subject: string, html: string) {
+    // Si resend es null, lanzamos un error descriptivo
+    if (!this.resend) {
+      this.logger.error('No se puede enviar el mail: Resend no está inicializado.');
+      throw new Error('Servicio de mail no configurado (falta API Key)');
+    }
+
     try {
+      // Usamos 'as any' o la estructura correcta según la versión de tu librería
       const result = await this.resend.emails.send({
         from: this.fromAddress,
-        to,
-        subject,
-        html,
+        to: to,
+        subject: subject,
+        html: html,
       });
       return result;
     } catch (error) {
