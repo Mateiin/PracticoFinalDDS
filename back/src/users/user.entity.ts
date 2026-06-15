@@ -26,7 +26,7 @@ export class UserEntity {
     @Column({ type: 'varchar', nullable: true })
     passwordResetToken!: string | null;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'datetime', nullable: true })
     passwordResetTokenExpiration!: Date | null;
 
 }
