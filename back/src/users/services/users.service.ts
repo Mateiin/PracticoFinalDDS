@@ -29,23 +29,18 @@ export class UsersService {
 
   private async sendVerificationEmail(to: string, token: string, subject: string) {
     const verificationLink = `http://localhost:4200/verify-email?token=${token}`;
-    const result = await this.mailService.sendMail(
-      to,
-      subject,
-      `<p>Hacé clic en el siguiente enlace para verificar tu cuenta:</p><a href="${verificationLink}">Verificar Email</a>`,
-    );
 
-    const warning = result?.error?.message as string | undefined;
-
-    if (warning) {
-      console.error('Resend rechazó el envío de verificación:', result.error);
+    try {
+      await this.mailService.sendMail(
+        to,
+        subject,
+        `<p>Hacé clic en el siguiente enlace para verificar tu cuenta:</p><a href="${verificationLink}">Verificar Email</a>`,
+      );
+      return { verificationLink, delivered: true };
+    } catch (error: any) {
+      console.error('Error al enviar email de verificación:', error?.message);
+      return { verificationLink, delivered: false, warning: error?.message };
     }
-
-    return {
-      verificationLink,
-      delivered: !warning,
-      warning,
-    };
   }
 
   async findAll(): Promise<ExternalUser[]> {
