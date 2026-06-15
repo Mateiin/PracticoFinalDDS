@@ -1,13 +1,15 @@
-import { JwtService } from '@nestjs/jwt';
 import { BadGatewayException, Inject, Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
-import {InjectRepository} from "@nestjs/typeorm";
-import { Repository } from "typeorm";
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from 'bcrypt';
-import { ExternalUser } from '../user.types';
+import * as crypto from 'crypto';
+import { Repository } from "typeorm";
+import { MailService } from '../../mail/mail.service';
 import { USERS_GATEWAY, UsersGateway } from '../gateways/users.gateway';
-import { UserEntity } from "../user.entity";
 import { UserRole } from "../user-role.enum";
+import { UserEntity } from "../user.entity";
+import { ExternalUser } from '../user.types';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +23,8 @@ export class UsersService {
     private readonly cfg: ConfigService,
 
     private readonly jwtService: JwtService,
+
+    private readonly mailService: MailService, // <-- Lo inyectamos acá
   ) {}
 
   async findAll(): Promise<ExternalUser[]> {
@@ -31,47 +35,46 @@ export class UsersService {
     }
   }
 
-  //src/users/services/users.service.ts
   async findOne(id: number) {
     try {
-      // Llamamos al gateway para buscar el usuario
       return await this.usersGateway.fetchById(id);
     } catch (error: any) {
-      // si axios detecta un error 404 (Not Found) en la API externa
       if (error.response?.status === 404) {
         throw new NotFoundException(`El usuario con ID ${id} no existe JSONPLaceholer `);
       }
-      // si es otro tipo de error, lanamos el error general que ya usa tu servicio
       throw new BadGatewayException('Error al obtener el usuario');
-
     }
   }
 
   async register(email: string, plainPassword: string) {
-    // SE LEE QUE TAN COMPLEJA DEBE SER LA ENCRIPTACION DESDE EL .env
     const round = Number(this.cfg.get<string>('BCRYPT_COST')?? '12');
-
-    //SE TRANSFORMA LA CONTRASEÑA DE TEXTO A UN HASH PARA QUE SEA INDESCIFRABLE
     const passwordHash = await bcrypt.hash(plainPassword, round);
-
-    //SE VERIFICA SI ES EL PRIMER USUARIO DE LA BD 
     const countUsers = await this.usersRepo.count();
-
-    //SI LA BD ESTA VACIA, EL PRIMER USUARIO ES ADMIN Y LOS DEMAS SON USER
     const role = countUsers === 0 ? UserRole.ADMIN : UserRole.USER;
 
-    //SE ARMA EL USUARIO Y SE GUARDA
-    const entity = this.usersRepo.create({ email, passwordHash, role });
-    const saved = await this.usersRepo.save(entity);
+    const emailVerificationToken = crypto.randomUUID();
 
-    //generamos token JWT
-    const payload = { sub: saved.id, email: saved.email, role: saved.role };
-    const token = await this.jwtService.signAsync(payload);
+    const entity = this.usersRepo.create({ 
+      email, 
+      passwordHash, 
+      role,
+      emailVerificationToken 
+    });
+    const savedUser = await this.usersRepo.save(entity);
 
-    return {
-      access_token: token,
-      user: { id: saved.id, email: saved.email, role: saved.role, createdAt: saved.createdAt },
-    };
+    const link = `http://localhost:4200/verify-email?token=${emailVerificationToken}`;
+    await this.mailService.sendMail(
+      email,
+      'Verificá tu cuenta',
+      `<p>Hacé clic en el siguiente enlace para verificar tu cuenta:</p><a href="${link}">Verificar Email</a>`
+    );
+
+    const payload = { sub: savedUser.id, email: savedUser.email, role: savedUser.role };
+    const access_token = await this.jwtService.signAsync(payload);
+
+    const { passwordHash: _, emailVerificationToken: __, ...userResponse } = savedUser;
+
+    return { access_token, user: userResponse };
   }
 
   async login(email: string, plainPassword: string) {
@@ -92,13 +95,9 @@ export class UsersService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    //se arma una mochila de datos que se llama paylod que es donde va a viajar encriptado el token
     const payload = { sub: user.id, email: user.email, role: user.role };
-    
-    //se firma el token con nuestro servicio
     const token = await this.jwtService.signAsync(payload);
 
-    //devolvemos el tojen al frontend junto con el usuario
     return {
       access_token: token,
       user: { id: user.id, email: user.email, role: user.role, createdAt: user.createdAt },
@@ -121,5 +120,3 @@ export class UsersService {
     return { id: saved.id, email: saved.email, role: saved.role, createdAt: saved.createdAt };
   }
 }
-
-

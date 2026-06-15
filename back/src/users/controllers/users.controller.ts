@@ -2,10 +2,10 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { MailService } from '../../mail/mail.service';
 import { UsersService } from '../services/users.service';
 import { UserRole } from '../user-role.enum';
 import { ExternalUser } from '../user.types';
-import { MailService } from '../../mail/mail.service';
 
 @Controller('users')
 export class UsersController {

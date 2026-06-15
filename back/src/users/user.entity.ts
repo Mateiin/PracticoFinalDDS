@@ -18,4 +18,18 @@ export class UserEntity {
     @CreateDateColumn()
     createdAt!: Date;
 
+    //Verificacion de email
+    @Column({ default: false })
+    isEmailVerified!: boolean;
+
+    @Column({ type:'varchar', nullable: true })
+    emailVerificationToken!: string | null;
+
+    //Recuperacion de contraseña
+    @Column({ type: 'varchar', nullable: true })
+    passwordResetToken!: string | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    passwordResetTokenExpiration!: Date | null;
+
 }
