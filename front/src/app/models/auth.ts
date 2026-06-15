@@ -13,4 +13,9 @@ export interface LoginDto {
 export interface AuthResponse {
   user: SafeUser;
   access_token: string;
+  emailDelivery?: {
+    delivered: boolean;
+    verificationLink: string;
+    warning?: string;
+  };
 }

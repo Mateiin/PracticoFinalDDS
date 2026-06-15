@@ -1,4 +1,4 @@
-import { BadGatewayException, Inject, Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from "@nestjs/typeorm";
@@ -26,6 +26,27 @@ export class UsersService {
 
     private readonly mailService: MailService, // <-- Lo inyectamos acá
   ) {}
+
+  private async sendVerificationEmail(to: string, token: string, subject: string) {
+    const verificationLink = `http://localhost:4200/verify-email?token=${token}`;
+    const result = await this.mailService.sendMail(
+      to,
+      subject,
+      `<p>Hacé clic en el siguiente enlace para verificar tu cuenta:</p><a href="${verificationLink}">Verificar Email</a>`,
+    );
+
+    const warning = result?.error?.message as string | undefined;
+
+    if (warning) {
+      console.error('Resend rechazó el envío de verificación:', result.error);
+    }
+
+    return {
+      verificationLink,
+      delivered: !warning,
+      warning,
+    };
+  }
 
   async findAll(): Promise<ExternalUser[]> {
     try {
@@ -62,11 +83,10 @@ export class UsersService {
     });
     const savedUser = await this.usersRepo.save(entity);
 
-    const link = `http://localhost:4200/verify-email?token=${emailVerificationToken}`;
-    await this.mailService.sendMail(
+    const emailDelivery = await this.sendVerificationEmail(
       email,
+      emailVerificationToken,
       'Verificá tu cuenta',
-      `<p>Hacé clic en el siguiente enlace para verificar tu cuenta:</p><a href="${link}">Verificar Email</a>`
     );
 
     const payload = { sub: savedUser.id, email: savedUser.email, role: savedUser.role };
@@ -74,7 +94,11 @@ export class UsersService {
 
     const { passwordHash: _, emailVerificationToken: __, ...userResponse } = savedUser;
 
-    return { access_token, user: userResponse };
+    return {
+      access_token,
+      user: userResponse,
+      emailDelivery,
+    };
   }
 
   async login(email: string, plainPassword: string) {
@@ -118,5 +142,66 @@ export class UsersService {
     user.role = newRole;
     const saved = await this.usersRepo.save(user);
     return { id: saved.id, email: saved.email, role: saved.role, createdAt: saved.createdAt };
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.usersRepo.findOne({
+      where: { emailVerificationToken: token },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Token inválido o expirado');
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    await this.usersRepo.save(user);
+
+    return { message: 'Email verificado correctamente' };
+  }
+
+  async resendVerification(userId: string) {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('El usuario ya está verificado');
+    }
+
+    user.emailVerificationToken = crypto.randomUUID();
+    await this.usersRepo.save(user);
+
+    const emailDelivery = await this.sendVerificationEmail(
+      user.email,
+      user.emailVerificationToken,
+      'Reenvío de verificación',
+    );
+
+    return {
+      message: 'Email reenviado',
+      emailDelivery,
+    };
+  }
+
+  async getMe(userId: string) {
+    const user = await this.usersRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isEmailVerified,
+    };
   }
 }

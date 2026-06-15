@@ -26,6 +26,7 @@ export class MailService {
     }
 
     try {
+      // Usamos 'as any' o la estructura correcta según la versión de tu librería
       const result = await this.resend.emails.send({
         from: this.fromAddress,
         to: to,

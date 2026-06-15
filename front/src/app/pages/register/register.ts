@@ -18,6 +18,8 @@ export class RegisterPage {
   password = '';
   confirmPassword = '';
   error = '';
+  deliveryWarning = '';
+  verificationLink = '';
   loading = signal(false);
   registered = signal(false);
 
@@ -32,7 +34,9 @@ export class RegisterPage {
     }
 
     try {
-      await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
+      const response = await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
+      this.deliveryWarning = response.emailDelivery?.warning ?? '';
+      this.verificationLink = response.emailDelivery?.verificationLink ?? '';
       this.registered.set(true);
       // Después de 3 segundos, redirigir al home
       setTimeout(() => this.router.navigate(['/']), 3000);
