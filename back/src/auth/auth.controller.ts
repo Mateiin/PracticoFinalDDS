@@ -34,4 +34,14 @@ export class AuthController {
   async resendVerification(@Req() req: any) {
     return this.usersService.resendVerification(req.user.id);
   }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.usersService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body('token') token: string, @Body('password') password: string) {
+    return this.usersService.resetPassword(token, password);
+  }
 }

@@ -188,6 +188,55 @@ export class UsersService {
     };
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.usersRepo.findOne({ where: { email } });
+    if (!user) {
+      return { message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña' };
+    }
+
+    const token = crypto.randomUUID();
+    user.passwordResetToken = token;
+    user.passwordResetTokenExpiration = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+    await this.usersRepo.save(user);
+
+    const resetLink = `http://localhost:4200/reset-password?token=${token}`;
+    try {
+      await this.mailService.sendMail(
+        email,
+        'Restablecé tu contraseña',
+        `<p>Hacé clic en el siguiente enlace para restablecer tu contraseña:</p>
+         <a href="${resetLink}">Restablecer contraseña</a>
+         <p>Este enlace expira en 1 hora.</p>`,
+      );
+    } catch {
+      console.error('Error al enviar email de recuperación');
+    }
+
+    return { message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.usersRepo.findOne({
+      where: { passwordResetToken: token },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Token inválido o expirado');
+    }
+
+    if (!user.passwordResetTokenExpiration || user.passwordResetTokenExpiration < new Date()) {
+      throw new BadRequestException('El token ha expirado');
+    }
+
+    const round = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
+    user.passwordHash = await bcrypt.hash(newPassword, round);
+    user.passwordResetToken = null;
+    user.passwordResetTokenExpiration = null;
+    await this.usersRepo.save(user);
+
+    return { message: 'Contraseña restablecida correctamente' };
+  }
+
   async getMe(userId: string) {
     const user = await this.usersRepo.findOne({
       where: { id: userId },

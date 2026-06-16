@@ -38,8 +38,8 @@ export class RegisterPage {
       this.deliveryWarning = response.emailDelivery?.warning ?? '';
       this.verificationLink = response.emailDelivery?.verificationLink ?? '';
       this.registered.set(true);
-      // Después de 3 segundos, redirigir al home
-      setTimeout(() => this.router.navigate(['/']), 3000);
+      // Redirigir a la página de verificación pendiente
+      this.router.navigate(['/verify-pending'], { queryParams: { email: this.email } });
     } catch (err: any) {
       this.error = err.error?.message || 'Error al registrarse';
       this.loading.set(false);

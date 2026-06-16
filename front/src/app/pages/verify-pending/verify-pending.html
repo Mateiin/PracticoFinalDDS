@@ -1,0 +1,42 @@
+<div class="verify-pending-container">
+  <div class="card">
+    <div class="icon-container">
+      <i class="bi bi-envelope-check"></i>
+    </div>
+
+    <h2>Revisá tu email</h2>
+
+    @if (email()) {
+      <p>Enviamos un enlace de verificación a <strong>{{ email() }}</strong></p>
+    } @else {
+      <p>Enviamos un enlace de verificación a tu email.</p>
+    }
+
+    <p class="text-muted small">Hacé clic en el enlace del email para activar tu cuenta. Si no lo encontrás, revisá la carpeta de spam.</p>
+
+    @if (resent()) {
+      <div class="alert alert-success">
+        <i class="bi bi-check-circle me-1"></i> Email reenviado correctamente.
+      </div>
+    }
+
+    @if (error()) {
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-1"></i> {{ error() }}
+      </div>
+    }
+
+    <div class="actions">
+      <button class="btn btn-primary w-100" (click)="resend()" [disabled]="resending()">
+        @if (resending()) {
+          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+        }
+        Reenviar email de verificación
+      </button>
+
+      <button class="btn btn-outline-secondary w-100 mt-2" (click)="goToLogin()">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Ir al Login
+      </button>
+    </div>
+  </div>
+</div>

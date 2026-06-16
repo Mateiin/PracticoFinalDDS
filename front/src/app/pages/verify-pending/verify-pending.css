@@ -1,0 +1,40 @@
+.verify-pending-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.icon-container {
+  font-size: 3.5rem;
+  color: #3b82f6;
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.actions {
+  margin-top: 24px;
+}
+
+.alert {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
