@@ -7,6 +7,7 @@ import { RouterOutlet } from '@angular/router';
 import { Navbar } from './shared/navbar/navbar'; 
 import { Footer } from './shared/footer/footer';
 import { BottomNav } from './shared/bottom-nav/bottom-nav';
+import { ToastComponent } from './shared/toast/toast';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,8 @@ import { BottomNav } from './shared/bottom-nav/bottom-nav';
     RouterOutlet,
     Navbar,
     Footer,
-    BottomNav
+    BottomNav,
+    ToastComponent
   ],
   templateUrl: 'app.html',
   styleUrls: ['app.css'],

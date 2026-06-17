@@ -1,4 +1,4 @@
-import { BadGatewayException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadGatewayException, Inject, Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from "@nestjs/typeorm";
@@ -82,6 +82,49 @@ export class UsersService {
     return { access_token, user: userResponse };
   }
 
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersRepo.findOne({ where: { email } });
+    if (!user) return;
+
+    const token = crypto.randomUUID();
+    const expiration = new Date(Date.now() + 3600_000);
+
+    user.passwordResetToken = token;
+    user.passwordResetTokenExpiration = expiration;
+    await this.usersRepo.save(user);
+
+    const link = `http://localhost:4200/reset-password?token=${token}`;
+    await this.mailService.sendMail(
+      email,
+      'Recuperación de contraseña',
+      `<p>Hacé clic en este enlace para restablecer tu contraseña:</p><a href="${link}">Restablecer Contraseña</a>`
+    );
+  }
+
+  async resetPassword(token: string, nuevaClave: string): Promise<void> {
+    const user = await this.usersRepo.findOne({
+      where: { passwordResetToken: token },
+    });
+
+    if (!user || !user.passwordResetTokenExpiration) {
+      throw new BadRequestException('Token inválido');
+    }
+
+    if (user.passwordResetTokenExpiration < new Date()) {
+      throw new BadRequestException('El token ha expirado');
+    }
+
+    const round = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
+    user.passwordHash = await bcrypt.hash(nuevaClave, round);
+    user.passwordResetToken = null;
+    user.passwordResetTokenExpiration = null;
+    await this.usersRepo.save(user);
+  }
+
+  async updateRole(id: number, role: UserRole): Promise<void> {
+    await this.usersRepo.update(id, { role });
+  }
+
   async login(email: string, plainPassword: string) {
     const cleanEmail = email.trim().toLowerCase();
 
@@ -103,6 +146,8 @@ export class UsersService {
     const payload = { sub: user.id, email: user.email, role: user.role };
     const token = await this.jwtService.signAsync(payload);
 
-    return { access_token: token };
+    const { passwordHash: _, emailVerificationToken: __, passwordResetToken: ___, passwordResetTokenExpiration: ____, ...userResponse } = user;
+
+    return { access_token: token, user: userResponse };
   }
 }

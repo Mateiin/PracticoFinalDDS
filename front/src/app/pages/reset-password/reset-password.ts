@@ -1,71 +1,58 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router'; 
-import { FormsModule } from '@angular/forms'; 
-import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
-import { ToastService } from '../../services/toast.service';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-reset-password',
-  standalone: true, 
-  
-  imports: [FormsModule, CommonModule, RouterLink], 
+  imports: [FormsModule, RouterLink],
   templateUrl: './reset-password.html',
-  styleUrls: ['./reset-password.css']
+  styleUrl: './reset-password.css',
 })
 export class ResetPasswordComponent implements OnInit {
-  token: string | null = '';
-  nuevaClave: string = '';
-  confirmarClave: string = '';
-  errorMismatch: boolean = false;
-  exito: boolean = false;
-  loading = signal(false); 
-
-  
   private route = inject(ActivatedRoute);
-  private authService = inject(AuthService);
-  private toastService = inject(ToastService);
+  private router = inject(Router);
+  private auth = inject(AuthService);
 
-  ngOnInit() {
-    
-    this.token = this.route.snapshot.queryParamMap.get('token');
-    
-    if (!this.token) {
-      this.toastService.error('El enlace de recuperación no es válido.');
-    }
+  token = '';
+  password = '';
+  confirmPassword = '';
+  loading = signal(false);
+  success = signal(false);
+  error = signal('');
+  invalidToken = signal(false);
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      this.token = params['token'] || '';
+      if (!this.token) {
+        this.invalidToken.set(true);
+        this.error.set('Token de recuperación no encontrado');
+      }
+    });
   }
 
-  async cambiarContrasena() {
-    this.errorMismatch = false;
-
-    if (this.nuevaClave !== this.confirmarClave) {
-      this.errorMismatch = true;
+  async submit(): Promise<void> {
+    if (this.password !== this.confirmPassword) {
+      this.error.set('Las contraseñas no coinciden');
       return;
     }
 
-    if (this.nuevaClave.length < 8) {
-      this.toastService.error('La contraseña debe tener al menos 8 caracteres.');
+    if (this.password.length < 8) {
+      this.error.set('La contraseña debe tener al menos 8 caracteres');
       return;
     }
 
-    if (!this.token) {
-      this.toastService.error('No hay un token de seguridad válido.');
-      return;
-    }
-
-    
     this.loading.set(true);
+    this.error.set('');
+
     try {
-      await firstValueFrom(
-        this.authService.resetPassword({ token: this.token, nuevaClave: this.nuevaClave })
-      );
-      
-      this.exito = true;
-      this.toastService.success('¡Contraseña actualizada en la base de datos!');
-      
-    } catch (error: any) {
-      this.toastService.error(error.error?.message || 'Error al actualizar la contraseña');
+      await firstValueFrom(this.auth.resetPassword(this.token, this.password));
+      this.success.set(true);
+      setTimeout(() => this.router.navigate(['/login']), 3000);
+    } catch (err: any) {
+      this.error.set(err.error?.message || 'Error al restablecer la contraseña');
     } finally {
       this.loading.set(false);
     }

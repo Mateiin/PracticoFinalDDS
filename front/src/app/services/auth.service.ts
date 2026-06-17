@@ -24,12 +24,12 @@ export class AuthService {
   }
 
   
-  forgotPassword(data: { email: string }): Observable<any> {
-    return this.http.post(`${this.api}/forgot-password`, data);
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.api}/forgot-password`, { email });
   }
 
-  resetPassword(data: { token: string, nuevaClave: string }): Observable<any> {
-    return this.http.post(`${this.api}/reset-password`, data);
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post(`${this.api}/reset-password`, { token, nuevaClave: password });
   }
 
 

@@ -1,44 +1,34 @@
 import { Component, inject, signal } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
-import { ToastService } from '../../services/toast.service'; // <-- Sumamos los toasts
-import { FormsModule } from '@angular/forms'; 
-import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
-  standalone: true, // ¡Excelente usar standalone!
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './forgot-password.html',
-  styleUrls: ['./forgot-password.css']
+  styleUrl: './forgot-password.css',
 })
 export class ForgotPasswordComponent {
-  // Usamos el mismo estilo de inyección que en tus otras pantallas
-  private authService = inject(AuthService);
-  private toastService = inject(ToastService);
+  private auth = inject(AuthService);
 
-  email: string = '';
-  mensajeEnviado: boolean = false;
-  loading = signal(false); // Agregamos el circulito de carga por si el mail tarda
+  email = '';
+  loading = signal(false);
+  sent = signal(false);
+  error = signal('');
 
-  async enviarLink() {
-    if (!this.email) {
-      this.toastService.error('Por favor, ingresá tu correo electrónico.');
-      return;
-    }
-    
+  async submit(): Promise<void> {
     this.loading.set(true);
-    
+    this.error.set('');
+
     try {
-      await firstValueFrom(this.authService.forgotPassword({ email: this.email }));
-    } catch (error) {
-      // Si falla, no hacemos nada. ¡Es intencional para no darle pistas a los hackers!
+      await firstValueFrom(this.auth.forgotPassword(this.email));
+      this.sent.set(true);
+    } catch (err: any) {
+      this.error.set(err.error?.message || 'Error al solicitar recuperación');
     } finally {
       this.loading.set(false);
-      this.mensajeEnviado = true; // Mostramos el texto en el HTML
-      
-      // Disparamos el Toast informativo
-      this.toastService.info('Si el email existe, recibirás un link de recuperación en unos minutos.');
     }
   }
 }

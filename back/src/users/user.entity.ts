@@ -15,6 +15,9 @@ export class UserEntity {
     @Column({ type: 'text', default: UserRole.USER })
     role!: UserRole;
 
+    @CreateDateColumn()
+    createdAt!: Date;
+
     //Verificacion de email
     @Column({ default: false })
     isEmailVerified!: boolean;
@@ -26,7 +29,7 @@ export class UserEntity {
     @Column({ type: 'varchar', nullable: true })
     passwordResetToken!: string | null;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'datetime', nullable: true })
     passwordResetTokenExpiration!: Date | null;
 
 }
