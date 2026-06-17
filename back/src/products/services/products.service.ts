@@ -20,17 +20,35 @@ export class ProductsService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
+  private enrichProduct(product: Product): Product {
+    if (!product.categoryId) {
+      return { ...product, category: null };
+    }
+    try {
+      const category = this.categoriesService.findById(product.categoryId);
+      return { ...product, category: { id: category.id, name: category.name } };
+    } catch {
+      return { ...product, category: null };
+    }
+  }
+
   async findAll(
     name?: string, 
     orderBy?: string, 
     order?: 'asc' | 'desc', 
     page?: number, 
     limit?: number): Promise<PaginatedResult<Product>> {
-    return await this.productsRepository.findAll(name, orderBy, order, page, limit);
+    const result = await this.productsRepository.findAll(name, orderBy, order, page, limit);
+    return {
+      ...result,
+      data: result.data.map((p) => this.enrichProduct(p)),
+    };
   }
 
   async findById(id: number): Promise<Product | undefined> {
-    return await this.productsRepository.findById(id);
+    const product = await this.productsRepository.findById(id);
+    if (!product) return undefined;
+    return this.enrichProduct(product);
   }
 
   async reduceStock(id: number, quantity: number): Promise<Product>{

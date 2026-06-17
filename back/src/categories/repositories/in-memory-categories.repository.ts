@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Category, CreateCategoryInput } from "../category.types";
+import { Category, CreateCategoryInput, UpdateCategoryInput } from "../category.types";
 import { CategoriesRepository } from "./categories.repository";
 
 @Injectable() //esto es vital para que NestJS sepa que puede "inyectar" esta clase luego
@@ -24,6 +24,13 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
         };
         this.categories.push(newCategory);
         return newCategory;
+    }
+
+    update(id: number, input: UpdateCategoryInput): Category | undefined {
+        const category = this.findById(id);
+        if (!category) return undefined;
+        if (input.name !== undefined) category.name = input.name;
+        return category;
     }
 
     remove(id: number): Category | undefined {

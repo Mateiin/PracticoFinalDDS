@@ -34,8 +34,8 @@ export class ProductsPage implements OnInit {
   formCategoryId: number | null = null;
 
   filterName = '';
-  sortBy = 'id';
-  order = 'ASC';
+  orderBy = 'id';
+  order = 'asc';
   page = 1;
   limit = 10;
   total = 0;
@@ -54,13 +54,13 @@ export class ProductsPage implements OnInit {
     try {
       const res = await firstValueFrom(this.productsService.findAll({
         name: this.filterName || undefined,
-        sortBy: this.sortBy as 'id' | 'name' | 'price' | 'stock',
-        order: this.order as 'ASC' | 'DESC',
+        orderBy: this.orderBy as 'id' | 'name' | 'price' | 'stock',
+        order: this.order as 'asc' | 'desc',
         page: this.page,
         limit: this.limit,
       }));
-      this.products.set(res.items);
-      this.total = res.total;
+      this.products.set(res.data);
+      this.total = res.meta.total;
     } catch {
       this.error = 'Error al cargar productos';
     } finally {

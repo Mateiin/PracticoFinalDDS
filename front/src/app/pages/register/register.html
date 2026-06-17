@@ -19,13 +19,7 @@
             <h3 class="mt-2 fw-bold">Registrarse</h3>
           </div>
 
-        @if (error) {
-          <div class="alert alert-danger d-flex align-items-center" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            {{ error }}
-          </div>
-        }
-
+       
         <form (ngSubmit)="submit()" #form="ngForm">
           <div class="mb-3">
             <label for="email" class="form-label fw-medium">Email</label>

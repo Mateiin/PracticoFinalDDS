@@ -29,7 +29,7 @@
         </div>
         <div class="col-md-2">
           <label class="form-label fw-medium small text-muted">Ordenar por</label>
-          <select class="form-select form-select-sm" [(ngModel)]="sortBy">
+          <select class="form-select form-select-sm" [(ngModel)]="orderBy">
             <option value="id">ID</option>
             <option value="name">Nombre</option>
             <option value="price">Precio</option>
@@ -39,8 +39,8 @@
         <div class="col-md-2">
           <label class="form-label fw-medium small text-muted">Dirección</label>
           <select class="form-select form-select-sm" [(ngModel)]="order">
-            <option value="ASC">Ascendente</option>
-            <option value="DESC">Descendente</option>
+            <option value="asc">Ascendente</option>
+            <option value="desc">Descendente</option>
           </select>
         </div>
         <div class="col-md-2">

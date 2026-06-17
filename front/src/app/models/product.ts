@@ -23,15 +23,18 @@ export interface UpdateProductDto {
 
 export interface QueryProductsDto {
   name?: string;
-  sortBy?: 'id' | 'name' | 'price' | 'stock';
-  order?: 'ASC' | 'DESC';
+  orderBy?: 'id' | 'name' | 'price' | 'stock';
+  order?: 'asc' | 'desc';
   page?: number;
   limit?: number;
 }
 
 export interface PaginatedProducts {
-  items: Product[];
-  total: number;
-  page: number;
-  limit: number;
+  data: Product[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }

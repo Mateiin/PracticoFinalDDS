@@ -31,11 +31,13 @@ import { MailModule } from '../mail/mail.module';
     UsersService,
     JwtStrategy,
     { provide: USERS_GATEWAY, useFactory: () => {
+        const source = process.env.USERS_SOURCE || 'local';
+        if (source === 'jsonplaceholder') {
+          console.log('Usando Gateway Externo');
+          return new JsonPlaceholderUsersGateway();
+        }
         console.log('Usando Gateway Local');
         return new LocalUsersGateway();
-      
-      console.log('Usando Gateway Externo');
-      return new JsonPlaceholderUsersGateway();
     }},
   ],
   exports: [UsersService, USERS_GATEWAY],

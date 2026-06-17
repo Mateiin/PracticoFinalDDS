@@ -3,9 +3,9 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/user-role.enum';
-import { Controller, Get, Post, Body, Param, Delete } from "@nestjs/common";
+import { Controller, Get, Post, Put, Body, Param, Delete } from "@nestjs/common";
 import { CategoriesService } from "../services/categories.service";
-import { CreateCategoryInput } from "../category.types";
+import { CreateCategoryInput, UpdateCategoryInput } from "../category.types";
 import { ProductsService } from '../../products/services/products.service';
 
 @Controller('categories') // esto hace que la URL base se localhost:3000/categories
@@ -33,6 +33,13 @@ export class CategoriesController {
     create(@Body() input: CreateCategoryInput) {
         // el decorador @Body() hace que el contenido del cuerpo de la petición (en formato JSON) se convierta en un objeto y se pase como argumento al método
         return this.categoriesService.create(input);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+    @Put(':id')
+    update(@Param('id') id: string, @Body() input: UpdateCategoryInput) {
+        return this.categoriesService.update(Number(id), input);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
