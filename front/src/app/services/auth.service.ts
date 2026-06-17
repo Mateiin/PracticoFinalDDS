@@ -8,9 +8,6 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  forgotPassword(arg0: { email: string; }): Observable<unknown> {
-      throw new Error('Method not implemented.');
-  }
   private readonly api = `${environment.apiUrl}/auth`;
   private readonly tokenKey = 'access_token';
 
@@ -25,6 +22,16 @@ export class AuthService {
       this.me().subscribe();
     }
   }
+
+  
+  forgotPassword(data: { email: string }): Observable<any> {
+    return this.http.post(`${this.api}/forgot-password`, data);
+  }
+
+  resetPassword(data: { token: string, nuevaClave: string }): Observable<any> {
+    return this.http.post(`${this.api}/reset-password`, data);
+  }
+
 
   register(dto: RegisterDto): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.api}/register`, dto).pipe(

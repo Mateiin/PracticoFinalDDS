@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service'; 
 
 @Component({
   selector: 'app-register',
@@ -13,28 +14,34 @@ import { AuthService } from '../../services/auth.service';
 export class RegisterPage {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toastService = inject(ToastService); 
 
   email = '';
   password = '';
   confirmPassword = '';
-  error = '';
   loading = signal(false);
+  
 
   async submit(): Promise<void> {
-    this.error = '';
     this.loading.set(true);
 
     if (this.password !== this.confirmPassword) {
-      this.error = 'Las contraseñas no coinciden';
+      
+      this.toastService.error('Las contraseñas no coinciden');
       this.loading.set(false);
       return;
     }
 
     try {
       await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
-      this.router.navigate(['/']);
+      
+     
+      this.toastService.success('¡Registro exitoso! Por favor revisá tu mail.');
+      
+      this.router.navigate(['/login']); 
     } catch (err: any) {
-      this.error = err.error?.message || 'Error al registrarse';
+      
+      this.toastService.error(err.error?.message || 'Error al registrarse');
     } finally {
       this.loading.set(false);
     }

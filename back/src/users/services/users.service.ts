@@ -8,6 +8,7 @@ import { ExternalUser } from '../user.types';
 import { USERS_GATEWAY, UsersGateway } from '../gateways/users.gateway';
 import { UserEntity } from "../user.entity";
 import { UserRole } from "../user-role.enum";
+import { MailService } from '../../mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +22,8 @@ export class UsersService {
     private readonly cfg: ConfigService,
 
     private readonly jwtService: JwtService,
+
+    private readonly mailService: MailService,
   ) {}
 
   async findAll(): Promise<ExternalUser[]> {
@@ -119,6 +122,71 @@ export class UsersService {
     user.role = newRole;
     const saved = await this.usersRepo.save(user);
     return { id: saved.id, email: saved.email, role: saved.role, createdAt: saved.createdAt };
+  }
+
+  
+
+  async forgotPassword(email: string) {
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await this.usersRepo.findOne({ where: { email: cleanEmail } });
+
+    // Por seguridad, si el usuario no existe, no tiramos error. 
+    // Fingimos demencia para que los hackers no adivinen correos[cite: 58].
+    if (!user) {
+      return { message: 'Si el correo existe, se envió un enlace.' };
+    }
+
+    // 1. Generamos un token especial que expira en 15 minutos
+    const payload = { sub: user.id, email: user.email, purpose: 'reset-password' };
+    const resetToken = await this.jwtService.signAsync(payload, { expiresIn: '15m' });
+
+    // 2. Armamos el link que va a apuntar a tu frontend de Angular
+    const recoveryLink = `http://localhost:4200/reset-password?token=${resetToken}`;
+
+    // 3. Mandamos el mail (Ajustá este método según cómo se llame en tu MailService)
+    await this.mailService.sendMail(
+      user.email,
+      'Recuperación de contraseña - UTN FRVM',
+      `<div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Recuperación de contraseña</h2>
+        <p>Hola,</p>
+        <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta.</p>
+        <p>Hacé clic en el siguiente botón para crear una nueva:</p>
+        <a href="${recoveryLink}" style="background-color: #0d6efd; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 15px 0;">Recuperar Contraseña</a>
+        <p style="color: #6c757d; font-size: 0.9em;">Este enlace es válido por 15 minutos. Si no solicitaste este cambio, ignorá este correo.</p>
+      </div>`
+    );
+
+    return { message: 'Si el correo existe, se envió un enlace.' };
+  }
+
+  async resetPassword(token: string, nuevaClave: string) {
+    try {
+      // 1. Verificamos que el token sea válido y no esté vencido
+      const payload = await this.jwtService.verifyAsync(token);
+
+      // Verificamos que sea un token exclusivo de recuperación
+      if (payload.purpose !== 'reset-password') {
+        throw new UnauthorizedException('Token inválido para esta operación');
+      }
+
+      // 2. Buscamos al usuario dueño de ese token
+      const user = await this.usersRepo.findOne({ where: { id: payload.sub } });
+      if (!user) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      // 3. Encriptamos la clave nueva que llegó del frontend
+      const round = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
+      user.passwordHash = await bcrypt.hash(nuevaClave, round);
+
+      // 4. Guardamos la nueva clave en la base de datos
+      await this.usersRepo.save(user);
+
+      return { message: 'Contraseña actualizada con éxito' };
+    } catch (error) {
+      throw new UnauthorizedException('El enlace es inválido o ha expirado. Por favor, solicitá uno nuevo.');
+    }
   }
 }
 
