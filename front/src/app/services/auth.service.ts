@@ -8,6 +8,9 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  forgotPassword(arg0: { email: string; }): Observable<unknown> {
+      throw new Error('Method not implemented.');
+  }
   private readonly api = `${environment.apiUrl}/auth`;
   private readonly tokenKey = 'access_token';
 
