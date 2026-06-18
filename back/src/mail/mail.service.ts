@@ -12,13 +12,14 @@ export class MailService {
     const port = parseInt(this.config.get<string>('SMTP_PORT') ?? process.env.SMTP_PORT ?? '0', 10);
     const user = this.config.get<string>('SMTP_USER') ?? process.env.SMTP_USER;
     const pass = this.config.get<string>('SMTP_PASS') ?? process.env.SMTP_PASS;
+    const normalizedPass = pass?.replace(/\s+/g, '');
 
-    if (host && port && user && pass) {
+    if (host && port && user && normalizedPass) {
       this.transporter = nodemailer.createTransport({
         host,
         port,
         secure: false,
-        auth: { user, pass },
+        auth: { user, pass: normalizedPass },
       });
     } else {
       this.logger.warn('SMTP no configurado. Los correos no se enviarán.');
