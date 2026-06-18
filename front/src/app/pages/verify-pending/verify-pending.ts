@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-verify-pending',
@@ -12,6 +13,7 @@ export class VerifyPendingPage {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   email = signal('');
   resending = signal(false);
@@ -32,8 +34,11 @@ export class VerifyPendingPage {
     try {
       await firstValueFrom(this.auth.resendVerification());
       this.resent.set(true);
+      this.toast.success('Email de verificación reenviado');
     } catch (err: any) {
-      this.error.set(err.error?.message || 'Error al reenviar el email de verificación');
+      const msg = err.error?.message || 'Error al reenviar el email de verificación';
+      this.error.set(msg);
+      this.toast.error(msg);
     } finally {
       this.resending.set(false);
     }

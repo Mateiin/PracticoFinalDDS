@@ -19,16 +19,18 @@ export class LoginPage {
   email = '';
   password = '';
   loading = signal(false);
-  
+  error = signal('');
 
   async submit(): Promise<void> {
     this.loading.set(true);
+    this.error.set('');
     try {
       await firstValueFrom(this.auth.login({ email: this.email, password: this.password }));
       this.router.navigate(['/']);
     } catch (err: any) {
-      
-      this.toastService.error(err.error?.message || 'Error al iniciar sesión');
+      const msg = err.error?.message || err.message || 'Error al iniciar sesión';
+      this.error.set(msg);
+      this.toastService.error(msg);
     } finally {
       this.loading.set(false);
     }

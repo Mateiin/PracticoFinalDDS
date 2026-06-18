@@ -133,6 +133,52 @@ export class UsersService {
     await this.usersRepo.update(id, { role });
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const q = this.usersRepo.createQueryBuilder('u')
+      .addSelect('u.passwordHash')
+      .where('u.id = :id', { id: userId });
+    const user = await q.getOne();
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!ok) {
+      throw new BadRequestException('La contraseña actual no es correcta');
+    }
+
+    const round = Number(this.cfg.get<string>('BCRYPT_COST') ?? '12');
+    user.passwordHash = await bcrypt.hash(newPassword, round);
+    await this.usersRepo.save(user);
+  }
+
+  async changeEmail(userId: string, newEmail: string, currentPassword: string): Promise<void> {
+    const q = this.usersRepo.createQueryBuilder('u')
+      .addSelect('u.passwordHash')
+      .where('u.id = :id', { id: userId });
+    const user = await q.getOne();
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!ok) {
+      throw new BadRequestException('La contraseña actual no es correcta');
+    }
+
+    const existing = await this.usersRepo.findOne({ where: { email: newEmail } });
+    if (existing) {
+      throw new BadRequestException('El email ya está en uso');
+    }
+
+    user.email = newEmail;
+    user.isEmailVerified = false;
+    user.emailVerificationToken = null;
+    await this.usersRepo.save(user);
+  }
+
   async login(email: string, plainPassword: string) {
     const cleanEmail = email.trim().toLowerCase();
 

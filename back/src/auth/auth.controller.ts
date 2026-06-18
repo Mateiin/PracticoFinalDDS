@@ -6,6 +6,11 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/services/users.service';
 import { UserEntity } from '../users/user.entity';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,13 +22,13 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() body: any) {
-    return this.usersService.register(body.email, body.password);
+  async register(@Body() dto: RegisterDto) {
+    return this.usersService.register(dto.email, dto.password);
   }
 
   @Post('login')
-  async login(@Body() body: any) {
-    return this.usersService.login(body.email, body.password);
+  async login(@Body() dto: LoginDto) {
+    return this.usersService.login(dto.email, dto.password);
   }
 
   @Get('me')
@@ -38,11 +43,13 @@ export class AuthController {
       email: user.email,
       role: user.role,
       createdAt: user.createdAt,
+      isEmailVerified: user.isEmailVerified,
     };
   }
 
   @Post('verify-email')
-  async verifyEmail(@Body('token') token: string) {
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    const token = dto.token;
     const user = await this.userRepository.findOne({
       where: { emailVerificationToken: token },
     });
@@ -59,14 +66,14 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-  async forgotPassword(@Body('email') email: string) {
-    await this.usersService.forgotPassword(email);
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.usersService.forgotPassword(dto.email);
     return { message: 'Si el email existe, recibirás un link de recuperación' };
   }
 
   @Post('reset-password')
-  async resetPassword(@Body() body: { token: string; nuevaClave: string }) {
-    await this.usersService.resetPassword(body.token, body.nuevaClave);
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.usersService.resetPassword(dto.token, dto.nuevaClave);
     return { message: 'Contraseña actualizada correctamente' };
   }
 

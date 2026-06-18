@@ -48,6 +48,14 @@ export class AuthService {
     return this.http.post(`${this.api}/resend-verification`, {});
   }
 
+  changePassword(dto: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<any> {
+    return this.http.patch(`${environment.apiUrl}/users/me/password`, dto);
+  }
+
+  changeEmail(dto: { newEmail: string; currentPassword: string }): Observable<any> {
+    return this.http.patch(`${environment.apiUrl}/users/me/email`, dto);
+  }
+
   forgotPassword(email: string): Observable<any> {
     return this.http.post(`${this.api}/forgot-password`, { email });
   }

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -14,6 +15,7 @@ export class ResetPasswordComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private auth = inject(AuthService);
+  private toast = inject(ToastService);
 
   token = '';
   password = '';
@@ -29,18 +31,23 @@ export class ResetPasswordComponent implements OnInit {
       if (!this.token) {
         this.invalidToken.set(true);
         this.error.set('Token de recuperación no encontrado');
+        this.toast.error('Token de recuperación no encontrado');
       }
     });
   }
 
   async submit(): Promise<void> {
     if (this.password !== this.confirmPassword) {
-      this.error.set('Las contraseñas no coinciden');
+      const msg = 'Las contraseñas no coinciden';
+      this.error.set(msg);
+      this.toast.error(msg);
       return;
     }
 
     if (this.password.length < 8) {
-      this.error.set('La contraseña debe tener al menos 8 caracteres');
+      const msg = 'La contraseña debe tener al menos 8 caracteres';
+      this.error.set(msg);
+      this.toast.error(msg);
       return;
     }
 
@@ -50,9 +57,12 @@ export class ResetPasswordComponent implements OnInit {
     try {
       await firstValueFrom(this.auth.resetPassword(this.token, this.password));
       this.success.set(true);
+      this.toast.success('Contraseña actualizada correctamente');
       setTimeout(() => this.router.navigate(['/login']), 3000);
     } catch (err: any) {
-      this.error.set(err.error?.message || 'Error al restablecer la contraseña');
+      const msg = err.error?.message || 'Error al restablecer la contraseña';
+      this.error.set(msg);
+      this.toast.error(msg);
     } finally {
       this.loading.set(false);
     }
