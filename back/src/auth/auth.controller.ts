@@ -96,11 +96,13 @@ export class AuthController {
     await this.userRepository.save(user);
 
     const link = `http://localhost:4200/verify-email?token=${user.emailVerificationToken}`;
-    await this.mailService.sendMail(
+     this.mailService.sendMail(
       user.email,
       'Reenvío de verificación',
       `<p>Haz clic aquí para verificar tu email: <a href="${link}">Verificar Email</a></p>`,
-    );
+    ).catch((err) => {
+      console.error('Error al enviar email de verificación:', err);
+    });
 
     return { message: 'Email reenviado' };
   }
