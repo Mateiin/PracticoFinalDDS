@@ -21,15 +21,13 @@ export class AuthResendVerificationController {
   user.verificationToken = randomUUID();
   await this.userRepository.save(user);
 
-   this.mailService.sendMail(
+  await this.mailService.sendMail(
     user.email,
     'Reenvío de verificación',
     `<p>Haz clic aquí para verificar: 
     <a href="http://localhost:4200/verify-email?token=${user.verificationToken}">
     Verificar Email</a></p>`
-  ).catch((err) => {
-    console.error('Error al enviar email de verificación:', err);
-  });
+  );
 
   return { message: 'Email reenviado' };
   }

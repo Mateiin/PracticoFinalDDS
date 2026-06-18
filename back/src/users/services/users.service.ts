@@ -70,13 +70,11 @@ export class UsersService {
 
     // 3. Enviamos el mail
     const link = `http://localhost:4200/verify-email?token=${emailVerificationToken}`;
-     this.mailService.sendMail(
+    await this.mailService.sendMail(
       email,
       'Verificá tu cuenta',
       `<p>Hacé clic en el siguiente enlace para verificar tu cuenta:</p><a href="${link}">Verificar Email</a>`
-    ).catch((err) => {
-      console.error('Error al enviar email de verificación:', err);
-    });
+    );
 
     // 4. Generamos el JWT para autenticación automática
     const payload = { sub: savedUser.id, email: savedUser.email, role: savedUser.role };
@@ -100,13 +98,15 @@ export class UsersService {
     await this.usersRepo.save(user);
 
     const link = `http://localhost:4200/reset-password?token=${token}`;
-     this.mailService.sendMail(
-      email,
-      'Recuperación de contraseña',
-      `<p>Hacé clic en este enlace para restablecer tu contraseña:</p><a href="${link}">Restablecer Contraseña</a>`
-    ).catch((err) => {
-      console.error('Error al enviar email de recuperación:', err);
-    });
+    try {
+      await this.mailService.sendMail(
+        email,
+        'Recuperación de contraseña',
+        `<p>Hacé clic en este enlace para restablecer tu contraseña:</p><a href="${link}">Restablecer Contraseña</a>`
+      );
+    } catch {
+      // Si falla el envío de mail, igual el token queda guardado
+    }
   }
 
   async resetPassword(token: string, nuevaClave: string): Promise<void> {
