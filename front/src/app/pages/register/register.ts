@@ -21,6 +21,8 @@ export class RegisterPage {
   confirmPassword = '';
   loading = signal(false);
   registered = signal(false);
+  deliveryWarning = '';
+  verificationLink = '';
 
   async submit(): Promise<void> {
     this.loading.set(true);
@@ -32,7 +34,11 @@ export class RegisterPage {
     }
 
     try {
-      await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
+      const res = await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
+      if (res.emailDelivery && !res.emailDelivery.delivered) {
+        this.deliveryWarning = res.emailDelivery.warning || 'No se pudo enviar el email';
+        this.verificationLink = res.emailDelivery.verificationLink;
+      }
       this.registered.set(true);
       setTimeout(() => this.router.navigate(['/']), 3000);
     } catch (err: any) {

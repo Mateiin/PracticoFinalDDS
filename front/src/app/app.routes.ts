@@ -11,13 +11,6 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./pages/login/login').then((m) => m.LoginPage),
   },
-  { 
-    path: 'forgot-password',
-    loadComponent: () => import('./pages/forgot-password/forgot-password').then((m) => m.ForgotPasswordComponent)
-  },
-  { path: 'reset-password', 
-    loadComponent: () => import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordComponent)
-  },
   {
     path: 'register',
     loadComponent: () => import('./pages/register/register').then((m) => m.RegisterPage),
@@ -49,18 +42,18 @@ export const routes: Routes = [
   },
   {
     path: 'forgot-password',
-    loadComponent: () => import('./pages/forgot-password/forgot-password').then((m) => m.ForgotPasswordPage),
+    loadComponent: () => import('./pages/forgot-password/forgot-password').then((m) => m.ForgotPasswordComponent),
   },
   {
     path: 'reset-password',
-    loadComponent: () => import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordPage),
+    loadComponent: () => import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordComponent),
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () => import('./pages/verify-email/verify-email').then((m) => m.VerifyEmailPage),
   },
   {
     path: 'verify-pending',
     loadComponent: () => import('./pages/verify-pending/verify-pending').then((m) => m.VerifyPendingPage),
-  },
-  {
-    path: 'verify-email',
-    loadComponent: () => import('./verify-email/verify-email.component').then((m) => m.VerifyEmail),
   },
 ];

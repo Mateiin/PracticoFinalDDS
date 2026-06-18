@@ -2,6 +2,8 @@ import { Component, Input, Output, EventEmitter, HostListener } from '@angular/c
 
 @Component({
   selector: 'app-bottom-sheet',
+  standalone: true,
+  imports: [],
   templateUrl: './bottom-sheet.html',
   styleUrl: './bottom-sheet.css',
 })

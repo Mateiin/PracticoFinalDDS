@@ -5,7 +5,6 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { MailService } from '../../mail/mail.service';
 import { UsersService } from '../services/users.service';
 import { UserRole } from '../user-role.enum';
-import { ExternalUser } from '../user.types';
 
 @Controller('users')
 export class UsersController {
@@ -17,23 +16,16 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
-  findAll(): Promise<ExternalUser[]> {
-    return this.usersService.findAll();
-  }
-
-  //src/users/controllers/users.controller.ts
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    // convertimos el ID de la URL a numero y llamamos al servicio para buscar el usuario
-    // como el servicio es async (usa axios), devolvemos la promesa
-    return this.usersService.findOne(Number(id));
+  findAll() {
+    return this.usersService.findAllDb();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id/role')
   async updateRole(@Param('id') id: string, @Body('role') role: UserRole) {
-    return this.usersService.updateRole(Number(id), role);
+    await this.usersService.updateRole(id, role);
+    return this.usersService.findAllDb().then(users => users.find(u => u.id === id));
   }
 
   @Post('test-email')

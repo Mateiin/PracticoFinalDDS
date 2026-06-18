@@ -35,6 +35,10 @@ export class UsersService {
     }
   }
 
+  async findAllDb(): Promise<UserEntity[]> {
+    return this.usersRepo.find();
+  }
+
   async findOne(id: number) {
     try {
       return await this.usersGateway.fetchById(id);
@@ -94,11 +98,15 @@ export class UsersService {
     await this.usersRepo.save(user);
 
     const link = `http://localhost:4200/reset-password?token=${token}`;
-    await this.mailService.sendMail(
-      email,
-      'Recuperación de contraseña',
-      `<p>Hacé clic en este enlace para restablecer tu contraseña:</p><a href="${link}">Restablecer Contraseña</a>`
-    );
+    try {
+      await this.mailService.sendMail(
+        email,
+        'Recuperación de contraseña',
+        `<p>Hacé clic en este enlace para restablecer tu contraseña:</p><a href="${link}">Restablecer Contraseña</a>`
+      );
+    } catch {
+      // Si falla el envío de mail, igual el token queda guardado
+    }
   }
 
   async resetPassword(token: string, nuevaClave: string): Promise<void> {
@@ -121,7 +129,7 @@ export class UsersService {
     await this.usersRepo.save(user);
   }
 
-  async updateRole(id: number, role: UserRole): Promise<void> {
+  async updateRole(id: string, role: UserRole): Promise<void> {
     await this.usersRepo.update(id, { role });
   }
 
