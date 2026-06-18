@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.css',
 })
-export class ForgotPasswordPage {
+export class ForgotPasswordComponent {
   private auth = inject(AuthService);
 
   email = '';

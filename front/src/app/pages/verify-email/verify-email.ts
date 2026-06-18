@@ -1,50 +1,41 @@
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-verify-email',
-  imports: [CommonModule],
+  imports: [RouterLink],
   templateUrl: './verify-email.html',
-  styleUrl: './verify-email.css',
 })
 export class VerifyEmailPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
 
-  isLoading = false;
-  message = '';
-  success = false;
+  loading = signal(true);
 
   ngOnInit() {
-    this.verifyEmail();
-  }
+    const token = this.route.snapshot.queryParamMap.get('token');
 
-  verifyEmail() {
-    this.isLoading = true;
-    this.route.queryParams.subscribe((params) => {
-      const token = params['token'];
-      if (token) {
-        const api = `${environment.apiUrl}/auth/verify-email`;
-        this.http.post(api, { token }).subscribe({
-          next: () => {
-            this.success = true;
-            this.message = '¡Email verificado correctamente!';
-            setTimeout(() => this.router.navigate(['/']), 2000);
-          },
-          error: (err: HttpErrorResponse) => {
-            this.success = false;
-            this.message = (err.error?.message as string) || 'Error al verificar el email';
-            this.isLoading = false;
-          },
-        });
-      } else {
-        this.message = 'Token de verificación no encontrado';
-        this.isLoading = false;
-      }
+    if (!token) {
+      this.toastService.error('El enlace de verificación no es válido.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.http.post(`${environment.apiUrl}/auth/verify-email`, { token }).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.toastService.success('¡Email verificado correctamente!');
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toastService.error('Error al verificar el email');
+        this.router.navigate(['/login']);
+      },
     });
   }
 }

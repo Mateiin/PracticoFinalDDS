@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.css',
 })
-export class ResetPasswordPage implements OnInit {
+export class ResetPasswordComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private auth = inject(AuthService);

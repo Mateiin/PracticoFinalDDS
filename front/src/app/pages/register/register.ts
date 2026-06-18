@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service'; 
 
 @Component({
   selector: 'app-register',
@@ -13,35 +14,30 @@ import { AuthService } from '../../services/auth.service';
 export class RegisterPage {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toastService = inject(ToastService); 
 
   email = '';
   password = '';
   confirmPassword = '';
-  error = '';
-  deliveryWarning = '';
-  verificationLink = '';
   loading = signal(false);
   registered = signal(false);
 
   async submit(): Promise<void> {
-    this.error = '';
     this.loading.set(true);
 
     if (this.password !== this.confirmPassword) {
-      this.error = 'Las contraseñas no coinciden';
+      this.toastService.error('Las contraseñas no coinciden');
       this.loading.set(false);
       return;
     }
 
     try {
-      const response = await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
-      this.deliveryWarning = response.emailDelivery?.warning ?? '';
-      this.verificationLink = response.emailDelivery?.verificationLink ?? '';
+      await firstValueFrom(this.auth.register({ email: this.email, password: this.password }));
       this.registered.set(true);
-      // Redirigir a la página de verificación pendiente
-      this.router.navigate(['/verify-pending'], { queryParams: { email: this.email } });
+      setTimeout(() => this.router.navigate(['/']), 3000);
     } catch (err: any) {
-      this.error = err.error?.message || 'Error al registrarse';
+      this.toastService.error(err.error?.message || 'Error al registrarse');
+    } finally {
       this.loading.set(false);
     }
   }

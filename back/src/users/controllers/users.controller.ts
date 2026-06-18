@@ -33,7 +33,7 @@ export class UsersController {
   @Roles(UserRole.ADMIN)
   @Patch(':id/role')
   async updateRole(@Param('id') id: string, @Body('role') role: UserRole) {
-    return this.usersService.updateRole(id, role);
+    return this.usersService.updateRole(Number(id), role);
   }
 
   @Post('test-email')

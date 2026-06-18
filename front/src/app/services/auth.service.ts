@@ -23,6 +23,16 @@ export class AuthService {
     }
   }
 
+  
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.api}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post(`${this.api}/reset-password`, { token, nuevaClave: password });
+  }
+
+
   register(dto: RegisterDto): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.api}/register`, dto).pipe(
       tap((res) => this.handleAuth(res)),

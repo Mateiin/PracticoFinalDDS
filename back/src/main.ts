@@ -5,12 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 👇 ACÁ HABILITAMOS CORS 👇
-  app.enableCors({
-    origin: true, // Permite cualquier origen (tu localhost:4200)
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  });
+  app.enableCors();
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Elimina cualquier dato extra que mande el usuario y no esta en la clase
@@ -19,7 +14,6 @@ async function bootstrap() {
     transformOptions: { enableImplicitConversion: true, // Permite la conversión de tipos de forma implícita
     },
  }));
- 
   await app.listen(3000);
 }
 bootstrap();

@@ -10,7 +10,7 @@ import { ProductsModule } from './products/products.module';
 import { TestModule } from './test/test.module';
 import { UsersModule } from './users/users.module';
 @Module({
-imports: [
+  imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
@@ -28,7 +28,7 @@ imports: [
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(LoggerMiddleware, TimingMiddleware).forRoutes('*');
+    // ¡Acá sacamos el TimingMiddleware y dejamos solo el Logger!
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }
-
