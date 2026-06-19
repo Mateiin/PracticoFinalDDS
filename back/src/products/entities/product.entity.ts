@@ -1,20 +1,20 @@
-import {Entity, PrimaryGeneratedColumn, Column} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Product } from '../product.types';
 
-@Entity('products') // aca llama a la tabla products en la base de datos
+@Entity('products')
 export class ProductEntity implements Product {
   @PrimaryGeneratedColumn()
   id!: number;
 
-    @Column()
-    name!: string;
+  @Column({ length: 100 })
+  name!: string;
 
-    @Column('decimal')
-    price!: number;
+  @Column('decimal', { precision: 10, scale: 2 })
+  price!: number;
 
-    @Column('int')
-    stock!: number;
+  @Column('int', { default: 0 })
+  stock!: number;
 
-    @Column('int')
-    categoryId!: number;
+  @Column('int', { nullable: true })
+  categoryId!: number;
 }

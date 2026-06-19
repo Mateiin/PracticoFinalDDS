@@ -9,15 +9,15 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
   // un contador para asignar IDs automaticamente (1, 2, 3 ...)
   private idCounter = 1;
 
-    findAll(): Category[] {
+    async findAll(): Promise<Category[]> {
         return this.categories;
     }
 
-    findById(id: number): Category | undefined {
+    async findById(id: number): Promise<Category | undefined> {
         return this.categories.find(category => category.id === id);
     }
 
-    create(input: CreateCategoryInput): Category {
+    async create(input: CreateCategoryInput): Promise<Category> {
         const newCategory: Category = {
             id: this.idCounter++,
             name: input.name,
@@ -26,19 +26,16 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
         return newCategory;
     }
 
-    update(id: number, input: UpdateCategoryInput): Category | undefined {
-        const category = this.findById(id);
+    async update(id: number, input: UpdateCategoryInput): Promise<Category | undefined> {
+        const category = await this.findById(id);
         if (!category) return undefined;
         if (input.name !== undefined) category.name = input.name;
         return category;
     }
 
-    remove(id: number): Category | undefined {
+    async remove(id: number): Promise<Category | undefined> {
         const index = this.categories.findIndex(category => category.id === id);
-        if (index === -1) {
-            return undefined; // no se encontró la categoría
-        }
-        // si lo encuntra, lo saca del array y devuelve la categoria eliminada
+        if (index === -1) return undefined;
         const removedCategory = this.categories[index];
         this.categories.splice(index, 1);
         return removedCategory;

@@ -44,7 +44,7 @@ export class UsersService {
       return await this.usersGateway.fetchById(id);
     } catch (error: any) {
       if (error.response?.status === 404) {
-        throw new NotFoundException(`El usuario con ID ${id} no existe JSONPLaceholer `);
+        throw new NotFoundException(`El usuario con ID ${id} no existe`);
       }
       throw new BadGatewayException('Error al obtener el usuario');
     }
@@ -69,7 +69,8 @@ export class UsersService {
     const savedUser = await this.usersRepo.save(entity);
 
     // 3. Enviamos el mail
-    const link = `http://localhost:4200/verify-email?token=${emailVerificationToken}`;
+    const frontendUrl = this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
+    const link = `${frontendUrl}/verify-email?token=${emailVerificationToken}`;
      this.mailService.sendMail(
       email,
       'Verificá tu cuenta',
@@ -83,7 +84,7 @@ export class UsersService {
     const access_token = await this.jwtService.signAsync(payload);
 
     // 5. Limpiamos datos sensibles de la respuesta (incluyendo el token)
-    const { passwordHash: _, emailVerificationToken: __, ...userResponse } = savedUser;
+    const { passwordHash: _, emailVerificationToken: __, passwordResetToken: ___, passwordResetTokenExpiration: ____, ...userResponse } = savedUser;
 
     return { access_token, user: userResponse };
   }
@@ -99,7 +100,8 @@ export class UsersService {
     user.passwordResetTokenExpiration = expiration;
     await this.usersRepo.save(user);
 
-    const link = `http://localhost:4200/reset-password?token=${token}`;
+    const frontendUrl = this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
+    const link = `${frontendUrl}/reset-password?token=${token}`;
      this.mailService.sendMail(
       email,
       'Recuperación de contraseña',
@@ -173,10 +175,19 @@ export class UsersService {
       throw new BadRequestException('El email ya está en uso');
     }
 
+    const newToken = crypto.randomUUID();
     user.email = newEmail;
     user.isEmailVerified = false;
-    user.emailVerificationToken = null;
+    user.emailVerificationToken = newToken;
     await this.usersRepo.save(user);
+
+    const frontendUrl = this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
+    const link = `${frontendUrl}/verify-email?token=${newToken}`;
+    this.mailService.sendMail(
+      newEmail,
+      'Verificá tu nuevo email',
+      `<p>Hacé clic en el siguiente enlace para verificar tu nuevo email:</p><a href="${link}">Verificar Email</a>`,
+    ).catch((err) => console.error('Error al enviar email de verificación:', err));
   }
 
   async login(email: string, plainPassword: string) {

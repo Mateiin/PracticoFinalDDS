@@ -1,8 +1,7 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { MailService } from '../../mail/mail.service';
 import { UsersService } from '../services/users.service';
 import { UserRole } from '../user-role.enum';
 import { ChangePasswordDto } from '../dto/change-password.dto';
@@ -10,10 +9,7 @@ import { ChangeEmailDto } from '../dto/change-email.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly mailService: MailService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -47,19 +43,4 @@ export class UsersController {
     return { message: 'Email actualizado correctamente' };
   }
 
-  @Post('test-email')
-  async testEmail(): Promise<{ ok: boolean; result?: any; error?: string }> {
-    try {
-      const result = await this.mailService.sendMail(
-        'mateocaullo@gmail.com',
-        'Prueba de Verificación',
-        '<h1>¡Funciona!</h1>',
-      );
-      return { ok: true, result };
-    } catch (error) {
-      console.error('Error en test-email:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return { ok: false, error: errorMessage };
-    }
-  }
 }

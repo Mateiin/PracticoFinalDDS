@@ -40,7 +40,7 @@ export class RegisterPage {
         this.verificationLink = res.emailDelivery.verificationLink;
       }
       this.registered.set(true);
-      setTimeout(() => this.router.navigate(['/']), 3000);
+      setTimeout(() => this.router.navigate(['/verify-pending']), 2000);
     } catch (err: any) {
       this.toastService.error(err.error?.message || 'Error al registrarse');
     } finally {

@@ -49,12 +49,9 @@ export class CategoriesController {
         return this.categoriesService.remove(Number(id));
     }
 
-    @Get(':id/products') // este endpoit es para traer los productos de una categoria.
-    getProductsByCategory(@Param('id') id: string) {
-        //primero comprobamos que la categoria exista
-        this.categoriesService.findById(Number(id)); // si no existe, esto lanzará un error 404 y se detendrá la ejecución
-
-        //si existe, le pedimos a productos que nos filtre por esa categoria
+    @Get(':id/products')
+    async getProductsByCategory(@Param('id') id: string) {
+        await this.categoriesService.findById(Number(id));
         return this.productsService.findByCategory(Number(id));
     }
 }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthResponse, LoginDto, RegisterDto } from '../models/auth';
 import { SafeUser } from '../models/user';
@@ -13,13 +13,21 @@ export class AuthService {
 
   user = signal<SafeUser | null>(null);
 
+  private readonly _initialized = new BehaviorSubject<boolean>(false);
+  readonly initialized$ = this._initialized.asObservable();
+
   constructor(
     private http: HttpClient,
     private router: Router,
   ) {
     const token = this.getToken();
     if (token) {
-      this.me().subscribe();
+      this.me().subscribe({
+        next: () => this._initialized.next(true),
+        error: () => this._initialized.next(true),
+      });
+    } else {
+      this._initialized.next(true);
     }
   }
   register(dto: RegisterDto): Observable<AuthResponse> {

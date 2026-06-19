@@ -1,4 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
 import { Repository } from 'typeorm';
@@ -6,9 +7,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/services/users.service';
 import { UserEntity } from '../users/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 
@@ -19,6 +20,7 @@ export class AuthController {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly mailService: MailService,
+    private readonly cfg: ConfigService,
   ) {}
 
   @Post('register')
@@ -95,7 +97,8 @@ export class AuthController {
     user.emailVerificationToken = crypto.randomUUID();
     await this.userRepository.save(user);
 
-    const link = `http://localhost:4200/verify-email?token=${user.emailVerificationToken}`;
+    const frontendUrl = this.cfg.get<string>('FRONTEND_URL') ?? 'http://localhost:4200';
+    const link = `${frontendUrl}/verify-email?token=${user.emailVerificationToken}`;
      this.mailService.sendMail(
       user.email,
       'Reenvío de verificación',

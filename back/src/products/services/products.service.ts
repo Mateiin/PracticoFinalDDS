@@ -20,12 +20,12 @@ export class ProductsService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  private enrichProduct(product: Product): Product {
+  private async enrichProduct(product: Product): Promise<Product> {
     if (!product.categoryId) {
       return { ...product, category: null };
     }
     try {
-      const category = this.categoriesService.findById(product.categoryId);
+      const category = await this.categoriesService.findById(product.categoryId);
       return { ...product, category: { id: category.id, name: category.name } };
     } catch {
       return { ...product, category: null };
@@ -33,15 +33,15 @@ export class ProductsService {
   }
 
   async findAll(
-    name?: string, 
-    orderBy?: string, 
-    order?: 'asc' | 'desc', 
-    page?: number, 
+    name?: string,
+    orderBy?: string,
+    order?: 'asc' | 'desc',
+    page?: number,
     limit?: number): Promise<PaginatedResult<Product>> {
     const result = await this.productsRepository.findAll(name, orderBy, order, page, limit);
     return {
       ...result,
-      data: result.data.map((p) => this.enrichProduct(p)),
+      data: await Promise.all(result.data.map((p) => this.enrichProduct(p))),
     };
   }
 
