@@ -5,10 +5,16 @@
         <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
         <h4 class="fw-bold">Verificando tu correo...</h4>
         <p class="text-muted">Por favor, esperá un momento.</p>
-      } @else {
+      } @else if (success()) {
         <i class="bi bi-check-circle text-success mb-3" style="font-size: 4rem;"></i>
-        <h4 class="fw-bold">¡Listo!</h4>
+        <h4 class="fw-bold">¡Email verificado correctamente!</h4>
         <p class="text-muted">Ya podés iniciar sesión en tu cuenta.</p>
+        <a routerLink="/login" class="btn btn-primary mt-3">Ir al Login</a>
+      } @else {
+        <i class="bi bi-x-circle text-danger mb-3" style="font-size: 4rem;"></i>
+        <h4 class="fw-bold">Token inválido o expirado</h4>
+        <p class="text-muted">{{ errorMsg() }}</p>
+        <p class="text-muted small">Para reenviar el email de verificación, iniciá sesión y usá la opción en tu perfil.</p>
         <a routerLink="/login" class="btn btn-primary mt-3">Ir al Login</a>
       }
     </div>
