@@ -82,6 +82,7 @@ export class AuthController {
   }
 
   @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async resendVerification(@Req() req: any) {
     const user = await this.userRepository.findOne({

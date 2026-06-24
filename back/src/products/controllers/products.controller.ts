@@ -26,13 +26,18 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query('name') name?: string, @Query('orderBy') orderBy?: string, @Query('order') order?: 'asc' | 'desc', 
+  async findAll(@Query('name') name?: string, @Query('orderBy') orderBy?: string, @Query('order') order?: 'asc' | 'desc',
    @Query('page') page?: string, @Query('limit') limit?: string) {
-   // tranformo el texto a numer. si no envia nada, le asigno 1 y 5 por defecto
     const pageNumber = page ? Number(page) : 1;
     const limitNumber = limit ? Number(limit) : 5;
-    // se lo paso al servicio para que se encargue de hacer el filtrado, ordenamiento y paginación
-    return this.productsService.findAll(name, orderBy, order, pageNumber, limitNumber);
+    const result = await this.productsService.findAll(name, orderBy, order, pageNumber, limitNumber);
+    return {
+      items: result.items,
+      total: result.meta.total,
+      page: result.meta.page,
+      limit: result.meta.limit,
+      meta: result.meta,
+    };
   }
 
   @Get(':id')
