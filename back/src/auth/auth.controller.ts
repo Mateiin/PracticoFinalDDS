@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
@@ -46,10 +46,12 @@ export class AuthController {
       role: user.role,
       createdAt: user.createdAt,
       isEmailVerified: user.isEmailVerified,
+      isVerified: user.isEmailVerified,
     };
   }
 
   @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
   async verifyEmail(@Body() dto: VerifyEmailDto) {
     const token = dto.token;
     const user = await this.userRepository.findOne({
@@ -91,7 +93,7 @@ export class AuthController {
     }
 
     if (user.isEmailVerified) {
-      throw new BadRequestException('El usuario ya está verificado');
+      return { message: 'El email ya está verificado' };
     }
 
     user.emailVerificationToken = crypto.randomUUID();

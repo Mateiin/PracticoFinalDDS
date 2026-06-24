@@ -42,7 +42,7 @@ export class TypeOrmProductsRepository implements ProductsRepository {
       .getMany();
 
     return {
-      data: data as Product[],
+      items: data as Product[],
       meta: { page: validPage, limit: validLimit, total, totalPages: Math.ceil(total / validLimit) },
     };
   }

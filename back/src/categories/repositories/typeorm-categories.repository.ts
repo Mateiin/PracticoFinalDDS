@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CategoryEntity } from '../entities/category.entity';
@@ -23,7 +23,14 @@ export class TypeOrmCategoriesRepository implements CategoriesRepository {
 
   async create(input: CreateCategoryInput): Promise<Category> {
     const entity = this.repo.create({ name: input.name });
-    return this.repo.save(entity);
+    try {
+      return await this.repo.save(entity);
+    } catch (err: any) {
+      if (err?.code === 'SQLITE_CONSTRAINT' || err?.code === '23505' || err?.message?.includes('UNIQUE')) {
+        throw new ConflictException(`Ya existe una categoría con el nombre "${input.name}"`);
+      }
+      throw err;
+    }
   }
 
   async update(id: number, input: UpdateCategoryInput): Promise<Category | undefined> {

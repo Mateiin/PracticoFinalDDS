@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, ConflictException,forwardRef } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
 import { CreateCategoryInput, UpdateCategoryInput } from "../category.types";
 import { CATEGORIES_REPOSITORY, CategoriesRepository } from "../repositories/categories.repository";
 import { ProductsService } from "../../products/services/products.service";
@@ -38,13 +38,6 @@ export class CategoriesService {
 
     async remove(id: number) {
         await this.findById(id);
-
-        const productsInside = await this.productsService.findByCategory(id);
-
-        if (productsInside.length > 0) {
-            throw new ConflictException(`No se puede eliminar la categoria tiene ${productsInside.length} productos asociados`);
-        }
-
         return this.categoriesRepository.remove(id);
     }
 }

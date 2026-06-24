@@ -15,6 +15,7 @@ export class CategoriesController {
         private readonly productsService: ProductsService,
     ) {}
 
+    @UseGuards(JwtAuthGuard)
     @Get() // esto hace que este método responda a GET /categories
     findAll() {
         return this.categoriesService.findAll();

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -21,7 +21,10 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id/role')
-  async updateRole(@Param('id') id: string, @Body('role') role: UserRole) {
+  async updateRole(@Param('id') id: string, @Body('role') role: UserRole, @Req() req: any) {
+    if (req.user.id === id) {
+      throw new ForbiddenException('No podés cambiar tu propio rol');
+    }
     await this.usersService.updateRole(id, role);
     return this.usersService.findAllDb().then(users => users.find(u => u.id === id));
   }

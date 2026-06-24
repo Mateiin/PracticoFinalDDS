@@ -1,0 +1,264 @@
+PRÁCTICO FINAL — LOG DE CORRECCIÓN API
+====================================================================================================
+Archivo:     /Users/mtheiler/Desktop/testapiscript/logs/2026-06-24_18-11-33.txt
+Inicio:      2026-06-24 18:11:33
+Fin:         2026-06-24 18:11:44
+
+API_URL      http://localhost:3000
+ADMIN        desarrolloreceiver@frogbot.ar
+USER         desarrolloreceiver2@frogbot.ar
+MAIL         imap
+
+Resumen:     22 OK | 15 FAIL | 0 SKIP | 37 total
+
+TABLA DE TESTS
+----------------------------------------------------------------------------------------------------
++-----------+-------+------+--------+-------+---------+
+| Timestamp | Grupo | Test | Estado | Input | Output  |
++-----------+-------+------+--------+-------+---------+
+| 18:11:33  | Bootstrap | Usuarios registrados | INFO   | admin=desarrolloreceiver@frogbot.ar | user=desarrolloreceiver2@frogbot.ar | runId=mqskj8a1a5xo | password=Elultimo10.. |
++-----------+-------+------+--------+-------+---------+
+| 18:11:33  | Auth  | POST /auth/login con credenciales válidas → 201 | OK     | POST http://localhost:3000/auth/login | body: {"email":"desarrolloreceiver2@frog | 201 | {"access_token":"eyJhbGci…","user":{"id":"801894bb-9259-40ae-8b1b-2c2e85c0 |
+|           |       |      |        | bot.ar","password":"***"} | 3eff","email":"desarrolloreceiver2@frogbot.ar","role":"user","createdAt":"2026-0 |
+|           |       |      |        |       | 6-25T00:11:33.712Z","isEmailVerified":false}} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:34  | Auth  | POST /auth/login credenciales inválidas → 401 | OK     | POST http://localhost:3000/auth/login | body: {"email":"desarrolloreceiver2@frog | 401 | {"message":"Credenciales inválidas","error":"Unauthorized","statusCode":40 |
+|           |       |      |        | bot.ar","password":"wrong-pa…"} | 1}      |
++-----------+-------+------+--------+-------+---------+
+| 18:11:34  | Auth  | GET /auth/me con JWT → 200 + campos requeridos | OK     | GET http://localhost:3000/auth/me | 200 | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@ |
+|           |       |      |        |       | frogbot.ar","role":"user","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerifie |
+|           |       |      |        |       | d":false} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:34  | Auth  | GET /auth/me sin token → 401 | OK     | GET http://localhost:3000/auth/me | 401 | {"message":"Unauthorized","statusCode":401} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:34  | Auth  | GET /auth/me token inválido → 401 | OK     | GET http://localhost:3000/auth/me | 401 | {"message":"Unauthorized","statusCode":401} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:34  | Verificación email | GET /auth/me incluye isVerified=false | FAIL   | GET http://localhost:3000/auth/me | 200 | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@ |
+|           |       |      |        |       | frogbot.ar","role":"user","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerifie |
+|           |       |      |        |       | d":false} |
+|           |       |      |        |       | falta campo "isVerified" en la respuesta |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Verificación email | Llega email y se extrae token | OK     | —     | —       |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Verificación email | POST /auth/verify-email con token válido → 200 | FAIL   | POST http://localhost:3000/auth/verify-email | body: {"token":"b5f8cd54…"} | 201 | {"message":"Email verificado correctamente"} |
+|           |       |      |        |       | verify-email: HTTP 201, esperado 200 |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Verificación email | GET /auth/me isVerified=true después de verificar | FAIL   | GET http://localhost:3000/auth/me | 200 | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@ |
+|           |       |      |        |       | frogbot.ar","role":"user","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerifie |
+|           |       |      |        |       | d":true} |
+|           |       |      |        |       | isVerified debe ser true |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Verificación email | POST /auth/verify-email token inválido → 400 | OK     | POST http://localhost:3000/auth/verify-email | body: {"token":"00000000…"} | 400 | {"message":"Token inválido o expirado","error":"Bad Request","statusCode": |
+|           |       |      |        |       | 400}    |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Verificación email | POST /auth/resend-verification con JWT → 200 | FAIL   | POST http://localhost:3000/auth/resend-verification | 400 | {"message":"El usuario ya está verificado","error":"Bad Request","statusCo |
+|           |       |      |        |       | de":400} |
+|           |       |      |        |       | resend-verification: HTTP 400, esperado 200 |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Verificación email | POST /auth/resend-verification sin JWT → 401 | OK     | POST http://localhost:3000/auth/resend-verification | 401 | {"message":"Unauthorized","statusCode":401} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | POST /categories como admin → 201 | OK     | POST http://localhost:3000/categories | body: {"name":"Electrónica-mqskj8a1a5xo" | 201 | {"id":1,"name":"Electrónica-mqskj8a1a5xo"} |
+|           |       |      |        | }     |         |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | POST /categories como user → 403 | OK     | POST http://localhost:3000/categories | body: {"name":"NoPermitido"} | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | GET /categories con JWT → 200 array | OK     | GET http://localhost:3000/categories | 200 | [{"id":1,"name":"Electrónica-mqskj8a1a5xo"}] |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | GET /categories sin JWT → 401 | FAIL   | GET http://localhost:3000/categories | 200 | [{"id":1,"name":"Electrónica-mqskj8a1a5xo"}] |
+|           |       |      |        |       | list categories sin token: HTTP 200, esperado 401 |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | GET /categories/:id → 200 | OK     | GET http://localhost:3000/categories/1 | 200 | {"id":1,"name":"Electrónica-mqskj8a1a5xo"} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | GET /categories/:id inexistente → 404 | OK     | GET http://localhost:3000/categories/999999 | 404 | {"message":"La categoria con ID 999999 no existe","error":"Not Found","sta |
+|           |       |      |        |       | tusCode":404} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | PUT /categories/:id como admin → 200 | OK     | PUT http://localhost:3000/categories/1 | body: {"name":"Electrónica-upd-mqskj8a1 | 200 | {"id":1,"name":"Electrónica-upd-mqskj8a1a5xo"} |
+|           |       |      |        | a5xo"} |         |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | PUT /categories/:id como user → 403 | OK     | PUT http://localhost:3000/categories/1 | body: {"name":"Hack"} | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories | POST /categories nombre duplicado → 409 | FAIL   | POST http://localhost:3000/categories | body: {"name":"Dup-mqskj8a1a5xo"} | 201 | {"id":2,"name":"Dup-mqskj8a1a5xo"} |
+|           |       |      |        | POST http://localhost:3000/categories | body: {"name":"Dup-mqskj8a1a5xo"} | 500 | {"statusCode":500,"message":"Internal server error"} |
+|           |       |      |        |       | duplicate category: HTTP 500, esperado 409 |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | POST /products como admin → 201 | FAIL   | POST http://localhost:3000/products | body: {"name":"Teclado-mqskj8a1a5xo","pric | 201 | {"id":1,"name":"Teclado-mqskj8a1a5xo","price":85.99,"stock":25,"categoryId |
+|           |       |      |        | e":85.99,"stock":25,"categoryId":1} | ":1}    |
+|           |       |      |        |       | falta campo "category" en la respuesta |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | POST /products como user → 403 | OK     | POST http://localhost:3000/products | body: {"name":"X","price":10,"categoryId": | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
+|           |       |      |        | 1}    |         |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | GET /products paginado → 200 + items/total/page/limit | FAIL   | GET http://localhost:3000/products?page=1&limit=10&sortBy=price&order=DESC | 200 | {"data":[{"id":1,"name":"Teclado-mqskj8a1a5xo","price":"85.99","stock":25, |
+|           |       |      |        |       | "categoryId":1,"category":{"id":1,"name":"Electrónica-upd-mqskj8a1a5xo"}}],"meta |
+|           |       |      |        |       | ":{"page":1,"limit":10,"total":1,"totalPages":1}} |
+|           |       |      |        |       | falta campo "items" en la respuesta |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | GET /products?name= filtra por nombre | FAIL   | GET http://localhost:3000/products?name=Teclado&page=1&limit=10 | 200 | {"data":[{"id":1,"name":"Teclado-mqskj8a1a5xo","price":"85.99","stock":25, |
+|           |       |      |        |       | "categoryId":1,"category":{"id":1,"name":"Electrónica-upd-mqskj8a1a5xo"}}],"meta |
+|           |       |      |        |       | ":{"page":1,"limit":10,"total":1,"totalPages":1}} |
+|           |       |      |        |       | filtro debe encontrar productos |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | GET /products/:id → 200 con category | FAIL   | GET http://localhost:3000/products/0 | 200 |   |
+|           |       |      |        |       | falta campo "category" en la respuesta |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | GET /products/:id inexistente → 404 | FAIL   | GET http://localhost:3000/products/999999 | 200 |   |
+|           |       |      |        |       | get product 404: HTTP 200, esperado 404 |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | PUT /products/:id como admin → 200 | FAIL   | PUT http://localhost:3000/products/0 | body: {"price":79.99,"stock":30} | 200 |   |
+|           |       |      |        |       | Cannot read properties of null (reading 'price') |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | PUT /products/:id como user → 403 | OK     | PUT http://localhost:3000/products/0 | body: {"price":1} | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | DELETE /products/:id como user → 403 | OK     | POST http://localhost:3000/products | body: {"name":"Temp-mqskj8a1a5xo","price": | 201 | {"id":2,"name":"Temp-mqskj8a1a5xo","price":99.99,"stock":10,"categoryId":1 |
+|           |       |      |        | 99.99,"stock":10,"categoryId":1} | }       |
+|           |       |      |        | DELETE http://localhost:3000/products/2 | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products | DELETE /products/:id como admin → 200 | OK     | POST http://localhost:3000/products | body: {"name":"Del-mqskj8a1a5xo","price":9 | 201 | {"id":3,"name":"Del-mqskj8a1a5xo","price":99.99,"stock":10,"categoryId":1} |
+|           |       |      |        | 9.99,"stock":10,"categoryId":1} | 200 | {"id":3,"name":"Del-mqskj8a1a5xo","price":"99.99","stock":10,"categoryId": |
+|           |       |      |        | DELETE http://localhost:3000/products/3 | 1}      |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Users (admin) | GET /users como admin → 200 | OK     | GET http://localhost:3000/users | 200 | [{"id":"c46de710-06cb-4da2-8544-c38700058c4d","email":"desarrolloreceiver@ |
+|           |       |      |        |       | frogbot.ar","role":"admin","createdAt":"2026-06-25T00:11:33.498Z","isEmailVerifi |
+|           |       |      |        |       | ed":false,"emailVerificationToken":"6afcb812…","passwordResetToken":null,"passwo |
+|           |       |      |        |       | rdResetTokenExpiration":null},{"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","emai |
+|           |       |      |        |       | l":"desarrolloreceiver2@frogbot.ar","role":"user","createdAt":"2026-06-25T00:11: |
+|           |       |      |        |       | 33.712Z","isEmailVerified":true,"emailVerificationToken":null,"passwordResetToke |
+|           |       |      |        |       | n":null,"passwordResetTokenExpiration":null}] |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Users (admin) | GET /users como user → 403 | OK     | GET http://localhost:3000/users | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Users (admin) | PATCH /users/:id/role promueve a admin → 200 | OK     | PATCH http://localhost:3000/users/801894bb-9259-40ae-8b1b-2c2e85c03eff/role | bo | 200 | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@ |
+|           |       |      |        | dy: {"role":"admin"} | frogbot.ar","role":"admin","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerifi |
+|           |       |      |        |       | ed":true,"emailVerificationToken":null,"passwordResetToken":null,"passwordResetT |
+|           |       |      |        |       | okenExpiration":null} |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Users (admin) | PATCH /users/:id/role propio usuario → 403 | FAIL   | PATCH http://localhost:3000/users/c46de710-06cb-4da2-8544-c38700058c4d/role | bo | 200 | {"id":"c46de710-06cb-4da2-8544-c38700058c4d","email":"desarrolloreceiver@f |
+|           |       |      |        | dy: {"role":"user"} | rogbot.ar","role":"user","createdAt":"2026-06-25T00:11:33.498Z","isEmailVerified |
+|           |       |      |        |       | ":false,"emailVerificationToken":"6afcb812…","passwordResetToken":null,"password |
+|           |       |      |        |       | ResetTokenExpiration":null} |
+|           |       |      |        |       | change own role: HTTP 200, esperado 403 |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Categories cleanup | DELETE /categories/:id como admin → 200 | FAIL   | DELETE http://localhost:3000/categories/1 | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
+|           |       |      |        |       | delete category: HTTP 403, esperado 200 |
++-----------+-------+------+--------+-------+---------+
+| 18:11:44  | Products cleanup | DELETE /products/:id principal → 200 | FAIL   | DELETE http://localhost:3000/products/0 | 403 | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
+|           |       |      |        |       | delete product: HTTP 403, esperado 200 |
++-----------+-------+------+--------+-------+---------+
+
+TABLA DE REQUESTS HTTP (detalle completo)
+----------------------------------------------------------------------------------------------------
++-----------+--------+-----+--------------+--------+---------------+
+| Timestamp | Método | URL | Request body | Status | Response body |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:33  | POST   | http://localhost:3000/auth/register | {"email":"desarrolloreceiver@frogbot.ar","password":"***"} | 201    | {"access_token":"eyJhbGci…","user":{"id":"c46de710-06cb-4da2-8544-c38700058c4d", |
+|           |        |     |              |        | "email":"desarrolloreceiver@frogbot.ar","role":"admin","createdAt":"2026-06-25T0 |
+|           |        |     |              |        | 0:11:33.498Z","isEmailVerified":false}} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:33  | POST   | http://localhost:3000/auth/register | {"email":"desarrolloreceiver2@frogbot.ar","password":"***"} | 201    | {"access_token":"eyJhbGci…","user":{"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff", |
+|           |        |     |              |        | "email":"desarrolloreceiver2@frogbot.ar","role":"user","createdAt":"2026-06-25T0 |
+|           |        |     |              |        | 0:11:33.712Z","isEmailVerified":false}} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:33  | POST   | http://localhost:3000/auth/login | {"email":"desarrolloreceiver2@frogbot.ar","password":"***"} | 201    | {"access_token":"eyJhbGci…","user":{"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff", |
+|           |        |     |              |        | "email":"desarrolloreceiver2@frogbot.ar","role":"user","createdAt":"2026-06-25T0 |
+|           |        |     |              |        | 0:11:33.712Z","isEmailVerified":false}} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:34  | POST   | http://localhost:3000/auth/login | {"email":"desarrolloreceiver2@frogbot.ar","password":"wrong-pa…"} | 401    | {"message":"Credenciales inválidas","error":"Unauthorized","statusCode":401} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:34  | GET    | http://localhost:3000/auth/me |              | 200    | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@frogbo |
+|           |        |     |              |        | t.ar","role":"user","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerified":fal |
+|           |        |     |              |        | se}           |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:34  | GET    | http://localhost:3000/auth/me |              | 401    | {"message":"Unauthorized","statusCode":401} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:34  | GET    | http://localhost:3000/auth/me |              | 401    | {"message":"Unauthorized","statusCode":401} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:34  | GET    | http://localhost:3000/auth/me |              | 200    | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@frogbo |
+|           |        |     |              |        | t.ar","role":"user","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerified":fal |
+|           |        |     |              |        | se}           |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/auth/verify-email | {"token":"b5f8cd54…"} | 201    | {"message":"Email verificado correctamente"} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/auth/me |              | 200    | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@frogbo |
+|           |        |     |              |        | t.ar","role":"user","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerified":tru |
+|           |        |     |              |        | e}            |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/auth/verify-email | {"token":"00000000…"} | 400    | {"message":"Token inválido o expirado","error":"Bad Request","statusCode":400} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/auth/resend-verification |              | 400    | {"message":"El usuario ya está verificado","error":"Bad Request","statusCode":40 |
+|           |        |     |              |        | 0}            |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/auth/resend-verification |              | 401    | {"message":"Unauthorized","statusCode":401} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/categories | {"name":"Electrónica-mqskj8a1a5xo"} | 201    | {"id":1,"name":"Electrónica-mqskj8a1a5xo"} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/categories | {"name":"NoPermitido"} | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/categories |              | 200    | [{"id":1,"name":"Electrónica-mqskj8a1a5xo"}] |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/categories |              | 200    | [{"id":1,"name":"Electrónica-mqskj8a1a5xo"}] |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/categories/1 |              | 200    | {"id":1,"name":"Electrónica-mqskj8a1a5xo"} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/categories/999999 |              | 404    | {"message":"La categoria con ID 999999 no existe","error":"Not Found","statusCod |
+|           |        |     |              |        | e":404}       |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | PUT    | http://localhost:3000/categories/1 | {"name":"Electrónica-upd-mqskj8a1a5xo"} | 200    | {"id":1,"name":"Electrónica-upd-mqskj8a1a5xo"} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | PUT    | http://localhost:3000/categories/1 | {"name":"Hack"} | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/categories | {"name":"Dup-mqskj8a1a5xo"} | 201    | {"id":2,"name":"Dup-mqskj8a1a5xo"} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/categories | {"name":"Dup-mqskj8a1a5xo"} | 500    | {"statusCode":500,"message":"Internal server error"} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/products | {"name":"Teclado-mqskj8a1a5xo","price":85.99,"stock":25,"categoryId":1} | 201    | {"id":1,"name":"Teclado-mqskj8a1a5xo","price":85.99,"stock":25,"categoryId":1} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/products | {"name":"X","price":10,"categoryId":1} | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/products?page=1&limit=10&sortBy=price&order=DESC |              | 200    | {"data":[{"id":1,"name":"Teclado-mqskj8a1a5xo","price":"85.99","stock":25,"categ |
+|           |        |     |              |        | oryId":1,"category":{"id":1,"name":"Electrónica-upd-mqskj8a1a5xo"}}],"meta":{"pa |
+|           |        |     |              |        | ge":1,"limit":10,"total":1,"totalPages":1}} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/products?name=Teclado&page=1&limit=10 |              | 200    | {"data":[{"id":1,"name":"Teclado-mqskj8a1a5xo","price":"85.99","stock":25,"categ |
+|           |        |     |              |        | oryId":1,"category":{"id":1,"name":"Electrónica-upd-mqskj8a1a5xo"}}],"meta":{"pa |
+|           |        |     |              |        | ge":1,"limit":10,"total":1,"totalPages":1}} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/products/0 |              | 200    |               |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/products/999999 |              | 200    |               |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | PUT    | http://localhost:3000/products/0 | {"price":79.99,"stock":30} | 200    |               |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | PUT    | http://localhost:3000/products/0 | {"price":1}  | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/products | {"name":"Temp-mqskj8a1a5xo","price":99.99,"stock":10,"categoryId":1} | 201    | {"id":2,"name":"Temp-mqskj8a1a5xo","price":99.99,"stock":10,"categoryId":1} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | DELETE | http://localhost:3000/products/2 |              | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | POST   | http://localhost:3000/products | {"name":"Del-mqskj8a1a5xo","price":99.99,"stock":10,"categoryId":1} | 201    | {"id":3,"name":"Del-mqskj8a1a5xo","price":99.99,"stock":10,"categoryId":1} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | DELETE | http://localhost:3000/products/3 |              | 200    | {"id":3,"name":"Del-mqskj8a1a5xo","price":"99.99","stock":10,"categoryId":1} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/users |              | 200    | [{"id":"c46de710-06cb-4da2-8544-c38700058c4d","email":"desarrolloreceiver@frogbo |
+|           |        |     |              |        | t.ar","role":"admin","createdAt":"2026-06-25T00:11:33.498Z","isEmailVerified":fa |
+|           |        |     |              |        | lse,"emailVerificationToken":"6afcb812…","passwordResetToken":null,"passwordRese |
+|           |        |     |              |        | tTokenExpiration":null},{"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"de |
+|           |        |     |              |        | sarrolloreceiver2@frogbot.ar","role":"user","createdAt":"2026-06-25T00:11:33.712 |
+|           |        |     |              |        | Z","isEmailVerified":true,"emailVerificationToken":null,"passwordResetToken":nul |
+|           |        |     |              |        | l,"passwordResetTokenExpiration":null}] |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | GET    | http://localhost:3000/users |              | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | PATCH  | http://localhost:3000/users/801894bb-9259-40ae-8b1b-2c2e85c03eff/role | {"role":"admin"} | 200    | {"id":"801894bb-9259-40ae-8b1b-2c2e85c03eff","email":"desarrolloreceiver2@frogbo |
+|           |        |     |              |        | t.ar","role":"admin","createdAt":"2026-06-25T00:11:33.712Z","isEmailVerified":tr |
+|           |        |     |              |        | ue,"emailVerificationToken":null,"passwordResetToken":null,"passwordResetTokenEx |
+|           |        |     |              |        | piration":null} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | PATCH  | http://localhost:3000/users/c46de710-06cb-4da2-8544-c38700058c4d/role | {"role":"user"} | 200    | {"id":"c46de710-06cb-4da2-8544-c38700058c4d","email":"desarrolloreceiver@frogbot |
+|           |        |     |              |        | .ar","role":"user","createdAt":"2026-06-25T00:11:33.498Z","isEmailVerified":fals |
+|           |        |     |              |        | e,"emailVerificationToken":"6afcb812…","passwordResetToken":null,"passwordResetT |
+|           |        |     |              |        | okenExpiration":null} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | DELETE | http://localhost:3000/categories/1 |              | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+
+| 18:11:44  | DELETE | http://localhost:3000/products/0 |              | 403    | {"message":"Forbidden resource","error":"Forbidden","statusCode":403} |
++-----------+--------+-----+--------------+--------+---------------+

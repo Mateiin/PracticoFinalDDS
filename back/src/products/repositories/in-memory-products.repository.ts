@@ -54,7 +54,7 @@ export class InMemoryProductsRepository implements ProductsRepository {
 
     // devolver el resultado con la data y la meta data
     return {
-      data: paginatedData,
+      items: paginatedData,
       meta: {
         page: validPage,
         limit: validLimit,

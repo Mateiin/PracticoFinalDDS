@@ -41,13 +41,13 @@ export class ProductsService {
     const result = await this.productsRepository.findAll(name, orderBy, order, page, limit);
     return {
       ...result,
-      data: await Promise.all(result.data.map((p) => this.enrichProduct(p))),
+      items: await Promise.all(result.items.map((p) => this.enrichProduct(p))),
     };
   }
 
-  async findById(id: number): Promise<Product | undefined> {
+  async findById(id: number): Promise<Product> {
     const product = await this.productsRepository.findById(id);
-    if (!product) return undefined;
+    if (!product) throw new NotFoundException(`El producto con ID ${id} no existe`);
     return this.enrichProduct(product);
   }
 
@@ -81,11 +81,14 @@ export class ProductsService {
   }
 
   async create(input: CreateProductInput): Promise<Product> {
-    return await this.productsRepository.create(input);
+    const product = await this.productsRepository.create(input);
+    return this.enrichProduct(product);
   }
 
-  async update(id: number, input: UpdateProductInput): Promise<Product | undefined> {
-    return await this.productsRepository.update(id, input);
+  async update(id: number, input: UpdateProductInput): Promise<Product> {
+    const updated = await this.productsRepository.update(id, input);
+    if (!updated) throw new NotFoundException(`El producto con ID ${id} no existe`);
+    return this.enrichProduct(updated);
   }
 
   async remove(id: number): Promise<Product | undefined> {
